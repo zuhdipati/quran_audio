@@ -34,7 +34,7 @@ class SurahModel {
       englishName: json["englishName"] ?? '',
       englishNameTranslation: json["englishNameTranslation"] ?? '',
       revelationType: json["revelationType"] ?? '',
-      numberOfAyahs: json["number OfAyahs"] ?? ayahsList.length,
+      numberOfAyahs: json["numberOfAyahs"] ?? ayahsList.length,
       ayahs: ayahsList,
       edition: json["edition"] != null
           ? EditionModel.fromJson(json["edition"])

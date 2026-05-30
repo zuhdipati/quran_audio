@@ -1,7 +1,10 @@
+import 'dart:io';
 import 'package:logger/logger.dart';
 
 class AppLogger {
   AppLogger._();
+
+  static final bool _isTest = Platform.environment.containsKey('FLUTTER_TEST');
 
   static final Logger _logger = Logger(
     printer: PrettyPrinter(
@@ -12,7 +15,7 @@ class AppLogger {
       printEmojis: true,
       dateTimeFormat: DateTimeFormat.dateAndTime,
     ),
-    level: Level.trace,
+    level: _isTest ? Level.off : Level.trace,
   );
 
   static void t(dynamic message, {Object? error, StackTrace? stackTrace}) {

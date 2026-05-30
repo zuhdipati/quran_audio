@@ -11,15 +11,17 @@ import 'package:quran_audio/features/quran/domain/repositories/quran_repository.
 class QuranRepositoryImpl implements QuranRepository {
   final QuranRemoteDataSource remoteDataSource;
   final QuranLocalDataSource localDataSource;
+  final InternetConnection internetConnection;
 
   QuranRepositoryImpl({
     required this.remoteDataSource,
     required this.localDataSource,
+    required this.internetConnection,
   });
 
   @override
   Future<Either<Failure, List<EditionEntity>>> getAllEdition() async {
-    bool hasConnection = await InternetConnection().hasInternetAccess;
+    bool hasConnection = await internetConnection.hasInternetAccess;
 
     try {
       if (hasConnection) {
@@ -39,7 +41,7 @@ class QuranRepositoryImpl implements QuranRepository {
 
   @override
   Future<Either<Failure, List<SurahEntity>>> getAllSurah(String edition) async {
-    bool hasConnection = await InternetConnection().hasInternetAccess;
+    bool hasConnection = await internetConnection.hasInternetAccess;
 
     try {
       if (hasConnection) {

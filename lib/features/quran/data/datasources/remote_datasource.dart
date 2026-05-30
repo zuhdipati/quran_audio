@@ -34,10 +34,13 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         final rootDir = data[0] as Map<String, dynamic>;
         final rootContents = rootDir['contents'] as List<dynamic>;
 
-        final bitrateDir = rootContents.firstWhere(
-          (dir) => dir['name'] == '128',
-          orElse: () => null,
-        );
+        Map<String, dynamic>? bitrateDir;
+        for (final dir in rootContents) {
+          if (dir is Map<String, dynamic> && dir['name'] == '128') {
+            bitrateDir = dir;
+            break;
+          }
+        }
 
         if (bitrateDir == null) {
           throw GeneralException(message: 'No audio editions found');
