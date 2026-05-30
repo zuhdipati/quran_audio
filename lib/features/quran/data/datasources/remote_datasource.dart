@@ -21,7 +21,7 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
   Future<List<EditionModel>> getAllEdition() async {
     try {
       final response = await dio.get(
-        urlgetAllEdition,
+        urlGetCdnInfo,
         options: Options(
           headers: {'Content-Type': 'application/json'},
           receiveTimeout: const Duration(seconds: 30),
@@ -30,10 +30,30 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
       );
 
       if (response.statusCode == 200) {
-        final Map<String, dynamic> data = response.data;
-        return List<EditionModel>.from(
-          data['data'].map((x) => EditionModel.fromJson(x)),
+        final List<dynamic> data = response.data;
+        final rootDir = data[0] as Map<String, dynamic>;
+        final rootContents = rootDir['contents'] as List<dynamic>;
+
+        final bitrateDir = rootContents.firstWhere(
+          (dir) => dir['name'] == '128',
+          orElse: () => null,
         );
+
+        if (bitrateDir == null) {
+          throw GeneralException(message: 'No audio editions found');
+        }
+
+        final editionDirs = bitrateDir['contents'] as List<dynamic>;
+
+        final editions = editionDirs
+            .where((dir) => dir['type'] == 'directory')
+            .map((dir) => EditionModel.fromIdentifier(dir['name'] as String))
+            .toList();
+
+        editions.sort((a, b) =>
+            (a.englishName ?? '').compareTo(b.englishName ?? ''));
+
+        return editions;
       } else {
         throw GeneralException(message: 'Failed to load editions');
       }

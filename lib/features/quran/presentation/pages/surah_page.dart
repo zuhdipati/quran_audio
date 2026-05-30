@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:quran_audio/core/utils/toast_utils.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
@@ -206,15 +207,20 @@ class _SurahPageViewState extends State<SurahPageView> {
                           return SurahTile(
                             surah: surah,
                             onTap: () async {
-                              bool hasConnection =
-                                  await InternetConnection().hasInternetAccess;
+                              bool hasConnection = await InternetConnection().hasInternetAccess;
                               if (!hasConnection) {
                                 ToastUtils.showError(
                                   'Audio playback is disabled while offline',
                                 );
                                 return;
                               }
-                              // TODO: Navigate to Player / Detail Surah
+                              if (context.mounted) {
+                                context.push('/player', extra: {
+                                  'surah': surah,
+                                  'editionIdentifier': state.currentEdition.identifier,
+                                  'surahList': state.allSurahs,
+                                });
+                              }
                             },
                           );
                         },

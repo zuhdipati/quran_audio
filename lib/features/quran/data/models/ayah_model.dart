@@ -1,5 +1,6 @@
 class AyahModel {
   final int number;
+  final String audio;
   final String text;
   final int numberInSurah;
   final int juz;
@@ -11,6 +12,7 @@ class AyahModel {
 
   const AyahModel({
     required this.number,
+    required this.audio,
     required this.text,
     required this.numberInSurah,
     required this.juz,
@@ -23,6 +25,7 @@ class AyahModel {
 
   factory AyahModel.fromJson(Map<String, dynamic> json) => AyahModel(
     number: json["number"] ?? 0,
+    audio: json["audio"] ?? '',
     text: json["text"] ?? '',
     numberInSurah: json["numberInSurah"] ?? 0,
     juz: json["juz"] ?? 0,
@@ -35,6 +38,7 @@ class AyahModel {
 
   Map<String, dynamic> toJson() => {
     "number": number,
+    "audio": audio,
     "text": text,
     "numberInSurah": numberInSurah,
     "juz": juz,

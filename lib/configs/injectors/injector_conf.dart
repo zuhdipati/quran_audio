@@ -11,6 +11,7 @@ import 'package:quran_audio/features/quran/domain/usecases/get_all_surah.dart';
 import 'package:quran_audio/features/quran/domain/usecases/get_qori.dart';
 import 'package:quran_audio/features/quran/domain/usecases/get_surah.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
+import 'package:quran_audio/features/quran/presentation/bloc/player/player_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_list_bloc.dart';
 
 final sl = GetIt.instance;
@@ -51,4 +52,5 @@ Future<void> configureDependencies(GetIt sl) async {
   // ==================== BLoC ====================
   sl.registerFactory(() => EditionBloc(getAllEdition: sl<GetAllEdition>()));
   sl.registerFactory(() => SurahListBloc(getAllSurah: sl<GetAllSurah>()));
+  sl.registerFactory(() => PlayerBloc());
 }

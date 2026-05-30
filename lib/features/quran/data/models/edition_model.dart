@@ -40,6 +40,28 @@ class EditionModel {
     direction: json["direction"],
   );
 
+  factory EditionModel.fromIdentifier(String identifier) {
+    // extract language from prefix (e.g. "ar" from "ar.alafasy")
+    final dotIndex = identifier.indexOf('.');
+    final language = dotIndex >= 0 ? identifier.substring(0, dotIndex) : '';
+    
+    // generate a readable name from identifier
+    final rawName = dotIndex >= 0 ? identifier.substring(dotIndex + 1) : identifier;
+    final englishName = rawName.isNotEmpty
+        ? rawName[0].toUpperCase() + rawName.substring(1)
+        : identifier;
+
+    return EditionModel(
+      identifier: identifier,
+      language: language,
+      name: englishName,
+      englishName: englishName,
+      format: 'audio',
+      type: 'versebyverse',
+      direction: null,
+    );
+  }
+
   Map<String, dynamic> toJson() => {
     "identifier": identifier,
     "language": language,
