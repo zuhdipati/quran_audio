@@ -7,7 +7,7 @@ import 'package:quran_audio/features/quran/presentation/bloc/player/player_state
 
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final ja.AudioPlayer _audioPlayer;
-  
+
   // stream subscriptions for player updates
   StreamSubscription? _positionSub;
   StreamSubscription? _durationSub;

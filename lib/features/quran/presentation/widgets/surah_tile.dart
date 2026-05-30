@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/core/utils/arabic_number_utils.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 
 class SurahTile extends StatelessWidget {
@@ -25,7 +26,7 @@ class SurahTile extends StatelessWidget {
               ),
               child: Center(
                 child: Text(
-                  surah.number.toString(),
+                  ArabicNumberUtils.convert(surah.number),
                   style: const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.w600,
@@ -48,7 +49,7 @@ class SurahTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${surah.revelationType} • ${surah.numberOfAyahs} Ayahs',
+                    '${surah.revelationType} • ${ArabicNumberUtils.convert(surah.numberOfAyahs)} Ayahs',
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textGrey,

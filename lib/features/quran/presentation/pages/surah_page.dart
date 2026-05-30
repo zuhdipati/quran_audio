@@ -89,169 +89,153 @@ class _SurahPageViewState extends State<SurahPageView> {
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
         ),
       ),
-      body: Stack(
+      body: Column(
         children: [
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                const Text(
+                  'Surah',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.black,
+                  ),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Text(
-                      'Surah',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.black,
-                      ),
+                GestureDetector(
+                  onTap: () => _showEditionSelector(context),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
                     ),
-                    GestureDetector(
-                      onTap: () => _showEditionSelector(context),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColors.primary),
-                        ),
-                        child: BlocBuilder<SurahListBloc, SurahListState>(
-                          builder: (context, state) {
-                            String editionName = 'Default';
-                            if (state is SurahListLoading &&
-                                state.currentEdition != null) {
-                              editionName = state.currentEdition!.englishName;
-                            } else if (state is SurahListLoaded) {
-                              editionName = state.currentEdition.englishName;
-                            }
-                            return Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Icon(
-                                  Icons.person_outline,
-                                  size: 16,
-                                  color: AppColors.primary,
-                                ),
-                                const SizedBox(width: 6),
-                                SizedBox(
-                                  width: 120,
-                                  child: Flexible(
-                                    child: Text(
-                                      'Qori: $editionName',
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(
-                                        color: AppColors.primary,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 14,
-                                      ),
-                                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.primary),
+                    ),
+                    child: BlocBuilder<SurahListBloc, SurahListState>(
+                      builder: (context, state) {
+                        String editionName = 'Default';
+                        if (state is SurahListLoading &&
+                            state.currentEdition != null) {
+                          editionName = state.currentEdition!.englishName;
+                        } else if (state is SurahListLoaded) {
+                          editionName = state.currentEdition.englishName;
+                        }
+                        return Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(
+                              Icons.person_outline,
+                              size: 16,
+                              color: AppColors.primary,
+                            ),
+                            const SizedBox(width: 6),
+                            SizedBox(
+                              width: 120,
+                              child: Flexible(
+                                child: Text(
+                                  'Qori: $editionName',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                    fontSize: 14,
                                   ),
                                 ),
-                                const SizedBox(width: 4),
-                                const Icon(
-                                  Icons.keyboard_arrow_down,
-                                  color: AppColors.primary,
-                                  size: 16,
-                                ),
-                              ],
-                            );
-                          },
-                        ),
-                      ),
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.keyboard_arrow_down,
+                              color: AppColors.primary,
+                              size: 16,
+                            ),
+                          ],
+                        );
+                      },
                     ),
-                  ],
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 10,
-                ),
-                child: TextField(
-                  decoration: InputDecoration(
-                    hintText: 'Search surah...',
-                    prefixIcon: const Icon(
-                      Icons.search,
-                      color: AppColors.textGrey,
-                    ),
-                    filled: true,
-                    fillColor: AppColors.lightGrey.withValues(alpha: 0.3),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      borderSide: BorderSide.none,
-                    ),
-                    contentPadding: EdgeInsets.zero,
                   ),
-                  onChanged: (query) {
-                    context.read<SurahListBloc>().add(SearchSurahs(query));
-                  },
                 ),
+              ],
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Search surah...',
+                prefixIcon: const Icon(Icons.search, color: AppColors.textGrey),
+                filled: true,
+                fillColor: AppColors.lightGrey.withValues(alpha: 0.3),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                contentPadding: EdgeInsets.zero,
               ),
-              Expanded(
-                child: BlocBuilder<SurahListBloc, SurahListState>(
-                  builder: (context, state) {
-                    if (state is SurahListLoading) {
-                      return const Center(
-                        child: CircularProgressIndicator(
-                          color: AppColors.primary,
-                        ),
-                      );
-                    } else if (state is SurahListLoaded) {
-                      if (state.filteredSurahs.isEmpty) {
-                        return const Center(child: Text('No surahs found.'));
-                      }
-                      return ListView.separated(
-                        itemCount: state.filteredSurahs.length,
-                        separatorBuilder: (context, index) => const Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 20),
-                          child: Divider(height: 1, color: AppColors.lightGrey),
-                        ),
-                        itemBuilder: (context, index) {
-                          final surah = state.filteredSurahs[index];
-                          return SurahTile(
-                            surah: surah,
-                            onTap: () async {
-                              bool hasConnection =
-                                  await InternetConnection().hasInternetAccess;
-                              if (!hasConnection) {
-                                ToastUtils.showError(
-                                  'Audio playback is disabled while offline',
-                                );
-                                return;
-                              }
-                              if (context.mounted) {
-                                context.push(
-                                  '/player',
-                                  extra: {
-                                    'surah': surah,
-                                    'editionIdentifier':
-                                        state.currentEdition.identifier,
-                                    'surahList': state.allSurahs,
-                                  },
-                                );
-                              }
-                            },
-                          );
+              onChanged: (query) {
+                context.read<SurahListBloc>().add(SearchSurahs(query));
+              },
+            ),
+          ),
+          Expanded(
+            child: BlocBuilder<SurahListBloc, SurahListState>(
+              builder: (context, state) {
+                if (state is SurahListLoading) {
+                  return const Center(
+                    child: CircularProgressIndicator(color: AppColors.primary),
+                  );
+                } else if (state is SurahListLoaded) {
+                  if (state.filteredSurahs.isEmpty) {
+                    return const Center(child: Text('No surahs found.'));
+                  }
+                  return ListView.separated(
+                    itemCount: state.filteredSurahs.length,
+                    separatorBuilder: (context, index) => const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 20),
+                      child: Divider(height: 1, color: AppColors.lightGrey),
+                    ),
+                    itemBuilder: (context, index) {
+                      final surah = state.filteredSurahs[index];
+                      return SurahTile(
+                        surah: surah,
+                        onTap: () async {
+                          bool hasConnection =
+                              await InternetConnection().hasInternetAccess;
+                          if (!hasConnection) {
+                            ToastUtils.showError(
+                              'Audio playback is disabled while offline',
+                            );
+                            return;
+                          }
+                          if (context.mounted) {
+                            context.push(
+                              '/player',
+                              extra: {
+                                'surah': surah,
+                                'editionIdentifier':
+                                    state.currentEdition.identifier,
+                                'surahList': state.allSurahs,
+                              },
+                            );
+                          }
                         },
                       );
-                    } else if (state is SurahListError) {
-                      return Center(child: Text(state.message));
-                    }
+                    },
+                  );
+                } else if (state is SurahListError) {
+                  return Center(child: Text(state.message));
+                }
 
-                    return const SizedBox.shrink();
-                  },
-                ),
-              ),
-            ],
+                return const SizedBox.shrink();
+              },
+            ),
           ),
-          // Positioned(bottom: 0, left: 10, right: 10, child: PlayerBottom()),
         ],
       ),
     );
