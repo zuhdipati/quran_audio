@@ -6,11 +6,7 @@ class SurahTile extends StatelessWidget {
   final SurahEntity surah;
   final VoidCallback onTap;
 
-  const SurahTile({
-    super.key,
-    required this.surah,
-    required this.onTap,
-  });
+  const SurahTile({super.key, required this.surah, required this.onTap});
 
   @override
   Widget build(BuildContext context) {

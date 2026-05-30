@@ -63,22 +63,18 @@ class EditionBottomSheet extends StatelessWidget {
                   if (state.filteredEditions.isEmpty) {
                     return const Center(child: Text('No editions found.'));
                   }
-                  
+
                   return ListView.separated(
                     itemCount: state.filteredEditions.length,
-                    separatorBuilder: (context, index) => const Divider(
-                      height: 1,
-                      color: AppColors.lightGrey,
-                    ),
+                    separatorBuilder: (context, index) =>
+                        const Divider(height: 1, color: AppColors.lightGrey),
                     itemBuilder: (context, index) {
                       final edition = state.filteredEditions[index];
                       return ListTile(
                         contentPadding: EdgeInsets.zero,
                         title: Text(
                           edition.englishName,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.w600,
-                          ),
+                          style: const TextStyle(fontWeight: FontWeight.w600),
                         ),
                         subtitle: Text(
                           '${edition.name} • ${edition.language}',

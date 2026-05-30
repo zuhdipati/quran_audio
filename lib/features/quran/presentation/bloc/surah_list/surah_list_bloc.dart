@@ -23,39 +23,40 @@ class SurahListBloc extends Bloc<SurahListEvent, SurahListState> {
     if (state is SurahListLoaded) {
       currentEdition = (state as SurahListLoaded).currentEdition;
     }
-    
+
     emit(SurahListLoading(currentEdition: currentEdition));
-    
+
     final result = await getAllSurah(event.edition.identifier);
     result.fold(
       (failure) => emit(SurahListError(failure.message)),
-      (surahs) => emit(SurahListLoaded(
-        allSurahs: surahs,
-        filteredSurahs: surahs,
-        currentEdition: event.edition,
-      )),
+      (surahs) => emit(
+        SurahListLoaded(
+          allSurahs: surahs,
+          filteredSurahs: surahs,
+          currentEdition: event.edition,
+        ),
+      ),
     );
   }
 
-  void _onSearchSurahs(
-    SearchSurahs event,
-    Emitter<SurahListState> emit,
-  ) {
+  void _onSearchSurahs(SearchSurahs event, Emitter<SurahListState> emit) {
     if (state is SurahListLoaded) {
       final currentState = state as SurahListLoaded;
       final query = event.query.toLowerCase();
-      
+
       final filtered = currentState.allSurahs.where((surah) {
         return surah.name.toLowerCase().contains(query) ||
             surah.englishName.toLowerCase().contains(query) ||
             surah.englishNameTranslation.toLowerCase().contains(query);
       }).toList();
-      
-      emit(SurahListLoaded(
-        allSurahs: currentState.allSurahs,
-        filteredSurahs: filtered,
-        currentEdition: currentState.currentEdition,
-      ));
+
+      emit(
+        SurahListLoaded(
+          allSurahs: currentState.allSurahs,
+          filteredSurahs: filtered,
+          currentEdition: currentState.currentEdition,
+        ),
+      );
     }
   }
 }

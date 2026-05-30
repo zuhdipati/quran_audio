@@ -2,7 +2,7 @@ part of 'surah_list_bloc.dart';
 
 abstract class SurahListState extends Equatable {
   const SurahListState();
-  
+
   @override
   List<Object?> get props => [];
 }
@@ -11,9 +11,9 @@ class SurahListInitial extends SurahListState {}
 
 class SurahListLoading extends SurahListState {
   final EditionEntity? currentEdition;
-  
+
   const SurahListLoading({this.currentEdition});
-  
+
   @override
   List<Object?> get props => [currentEdition];
 }

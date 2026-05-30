@@ -7,10 +7,10 @@ class AppLogger {
     printer: PrettyPrinter(
       methodCount: 2,
       errorMethodCount: 8,
-      lineLength: 120, 
+      lineLength: 120,
       colors: true,
       printEmojis: true,
-      dateTimeFormat: DateTimeFormat.dateAndTime, 
+      dateTimeFormat: DateTimeFormat.dateAndTime,
     ),
     level: Level.trace,
   );

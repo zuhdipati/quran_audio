@@ -49,7 +49,11 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
       throw GeneralException(message: 'Network error occurred');
     } catch (e, stackTrace) {
       if (e is GeneralException) rethrow;
-      AppLogger.e('Unexpected error in getAllEdition', error: e, stackTrace: stackTrace);
+      AppLogger.e(
+        'Unexpected error in getAllEdition',
+        error: e,
+        stackTrace: stackTrace,
+      );
       throw GeneralException(message: 'An unexpected error occurred');
     }
   }
@@ -66,9 +70,9 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         ),
       );
 
-      if (response.statusCode == 200) { 
+      if (response.statusCode == 200) {
         final Map<String, dynamic> data = response.data;
-        return List<SurahModel>.from( 
+        return List<SurahModel>.from(
           (data['data']['surahs'] as List).map((x) => SurahModel.fromJson(x)),
         );
       } else {
@@ -86,7 +90,11 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
       throw GeneralException(message: 'Network error occurred');
     } catch (e, stackTrace) {
       if (e is GeneralException) rethrow;
-      AppLogger.e('Unexpected error in getAllSurah', error: e, stackTrace: stackTrace);
+      AppLogger.e(
+        'Unexpected error in getAllSurah',
+        error: e,
+        stackTrace: stackTrace,
+      );
       throw GeneralException(message: 'An unexpected error occurred');
     }
   }
@@ -121,7 +129,11 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
       throw GeneralException(message: 'Network error occurred');
     } catch (e, stackTrace) {
       if (e is GeneralException) rethrow;
-      AppLogger.e('Unexpected error in getSurah', error: e, stackTrace: stackTrace);
+      AppLogger.e(
+        'Unexpected error in getSurah',
+        error: e,
+        stackTrace: stackTrace,
+      );
       throw GeneralException(message: 'An unexpected error occurred');
     }
   }

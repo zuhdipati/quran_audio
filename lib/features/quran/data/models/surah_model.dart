@@ -21,7 +21,7 @@ class SurahModel {
     required this.numberOfAyahs,
     required this.ayahs,
     required this.edition,
-  }); 
+  });
 
   factory SurahModel.fromJson(Map<String, dynamic> json) {
     final ayahsList = json["ayahs"] != null

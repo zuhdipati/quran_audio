@@ -2,7 +2,7 @@ part of 'edition_bloc.dart';
 
 sealed class EditionState extends Equatable {
   const EditionState();
-  
+
   @override
   List<Object?> get props => [];
 }
