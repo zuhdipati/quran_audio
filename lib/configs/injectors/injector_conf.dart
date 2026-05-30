@@ -1,11 +1,24 @@
-import 'injector.dart';
+import 'package:dio/dio.dart';
+import 'package:get_it/get_it.dart';
+import 'package:hive/hive.dart';
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:quran_audio/configs/adapters/adapter_conf.dart';
+import 'package:quran_audio/core/services/network_info.dart';
+import 'package:quran_audio/features/quran/data/datasources/local_datasource.dart';
+import 'package:quran_audio/features/quran/data/datasources/remote_datasource.dart';
+import 'package:quran_audio/features/quran/data/repositories/quran_repository_impl.dart';
+import 'package:quran_audio/features/quran/domain/repositories/quran_repository.dart';
+import 'package:quran_audio/features/quran/domain/usecases/get_all_surah.dart';
+import 'package:quran_audio/features/quran/domain/usecases/get_qori.dart';
+import 'package:quran_audio/features/quran/domain/usecases/get_surah.dart';
+import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
+import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_list_bloc.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initInjector() async {
   await configureDependencies(sl);
 }
-
 
 Future<void> configureDependencies(GetIt sl) async {
   // ==================== External ====================
@@ -40,4 +53,8 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerLazySingleton(() => GetAllEdition(sl<QuranRepository>()));
   sl.registerLazySingleton(() => GetAllSurah(sl<QuranRepository>()));
   sl.registerLazySingleton(() => GetSurah(sl<QuranRepository>()));
+
+  // ==================== BLoC ====================
+  sl.registerFactory(() => EditionBloc(getAllEdition: sl<GetAllEdition>()));
+  sl.registerFactory(() => SurahListBloc(getAllSurah: sl<GetAllSurah>()));
 }

@@ -6,11 +6,20 @@ class AppTheme {
   static final appTheme = ThemeData(
     primaryColor: AppColors.primary,
     scaffoldBackgroundColor: AppColors.secondary,
-    brightness: Brightness.dark,
-    textTheme: GoogleFonts.plusJakartaSansTextTheme(),
-    appBarTheme: AppBarTheme(
+    brightness: Brightness.light,
+    textTheme: GoogleFonts.plusJakartaSansTextTheme().apply(
+      bodyColor: AppColors.black,
+      displayColor: AppColors.black,
+    ),
+    appBarTheme: const AppBarTheme(
       backgroundColor: AppColors.secondary,
       foregroundColor: AppColors.black,
+      elevation: 0,
+      centerTitle: true,
+    ),
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: AppColors.primary,
+      primary: AppColors.primary,
     ),
   );
 }

@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'dart:developer';
+import 'package:quran_audio/core/utils/app_logger.dart';
 
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 
@@ -13,10 +13,10 @@ class ConnectivityService {
 
       if (isDisconnected) {
         _hasDisconnected = true;
-        log('No Internet Connection');
+        AppLogger.w('No Internet Connection');
         // ToastUtils.error('No Internet Connection');
       } else if (_hasDisconnected) {
-        log('Youre Online');
+        AppLogger.i('Youre Online');
         // ToastUtils.success("You're Online");
       }
     });

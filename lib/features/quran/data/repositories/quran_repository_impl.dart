@@ -41,6 +41,7 @@ class QuranRepositoryImpl implements QuranRepository {
   Future<Either<Failure, List<SurahEntity>>> getAllSurah(String edition) async {
     try {
       final result = await remoteDataSource.getAllSurah(edition);
+
       return Right(result.map((e) => e.toEntity()).toList());
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
