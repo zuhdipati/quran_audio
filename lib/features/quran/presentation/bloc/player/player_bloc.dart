@@ -7,10 +7,13 @@ import 'package:quran_audio/features/quran/presentation/bloc/player/player_state
 
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final ja.AudioPlayer _audioPlayer;
+  
+  // stream subscriptions for player updates
   StreamSubscription? _positionSub;
   StreamSubscription? _durationSub;
   StreamSubscription? _playerStateSub;
 
+  // constructor that sets up event handlers and starts listening to the player
   PlayerBloc({ja.AudioPlayer? audioPlayer})
     : _audioPlayer = audioPlayer ?? ja.AudioPlayer(),
       super(const PlayerState()) {
@@ -29,6 +32,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     _listenToAudioPlayer();
   }
 
+  // listens to position, duration, and completion streams from just_audio
   void _listenToAudioPlayer() {
     _positionSub = _audioPlayer.positionStream.listen((pos) {
       add(UpdatePosition(pos));
@@ -46,10 +50,12 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     });
   }
 
+  // builds the cdn url for the requested surah audio
   String _buildAudioUrl(String editionIdentifier, int surahNumber) {
     return 'https://cdn.islamic.network/quran/audio-surah/128/$editionIdentifier/$surahNumber.mp3';
   }
 
+  // loads a new surah audio file into the player and auto plays it
   Future<void> _onLoadSurah(LoadSurah event, Emitter<PlayerState> emit) async {
     try {
       emit(
@@ -86,11 +92,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     }
   }
 
+  // starts playing the current loaded audio
   Future<void> _onPlayAudio(PlayAudio event, Emitter<PlayerState> emit) async {
     emit(state.copyWith(status: PlayerStatus.playing));
     await _audioPlayer.play();
   }
 
+  // pauses the audio playback
   Future<void> _onPauseAudio(
     PauseAudio event,
     Emitter<PlayerState> emit,
@@ -99,6 +107,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     await _audioPlayer.pause();
   }
 
+  // resumes the audio from paused state
   Future<void> _onResumeAudio(
     ResumeAudio event,
     Emitter<PlayerState> emit,
@@ -107,6 +116,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     await _audioPlayer.play();
   }
 
+  // skips to the next surah in the list if available
   Future<void> _onNextSurah(NextSurah event, Emitter<PlayerState> emit) async {
     if (!state.hasNextSurah) return;
     final currentIndex = state.surahList.indexWhere(
@@ -122,6 +132,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     );
   }
 
+  // goes back to the previous surah in the list if available
   Future<void> _onPreviousSurah(
     PreviousSurah event,
     Emitter<PlayerState> emit,
@@ -140,18 +151,22 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     );
   }
 
+  // seeks the audio to a specific position
   Future<void> _onSeekAudio(SeekAudio event, Emitter<PlayerState> emit) async {
     await _audioPlayer.seek(event.position);
   }
 
+  // updates the current playback position in the state
   void _onUpdatePosition(UpdatePosition event, Emitter<PlayerState> emit) {
     emit(state.copyWith(position: event.position));
   }
 
+  // updates the total audio duration in the state
   void _onUpdateDuration(UpdateDuration event, Emitter<PlayerState> emit) {
     emit(state.copyWith(duration: event.duration));
   }
 
+  // handles the end of audio playback and auto-plays the next surah
   void _onAudioCompleted(AudioCompleted event, Emitter<PlayerState> emit) {
     emit(
       state.copyWith(status: PlayerStatus.completed, position: state.duration),
@@ -171,11 +186,13 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     );
   }
 
+  // stops playback and resets the player state to initial
   Future<void> _onStopAudio(StopAudio event, Emitter<PlayerState> emit) async {
     await _audioPlayer.stop();
     emit(state.copyWith(status: PlayerStatus.initial));
   }
 
+  // cleans up subscriptions and player resources
   @override
   Future<void> close() {
     _positionSub?.cancel();
