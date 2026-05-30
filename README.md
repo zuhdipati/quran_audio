@@ -43,3 +43,4 @@ This project strictly adheres to **Clean Architecture** principles and uses **BL
 <img width="390" height="844" alt="Simulator Screenshot - iPhone 16e - 2026-05-31 at 03 37 42" src="https://github.com/user-attachments/assets/75c06140-329e-4488-a1e4-5d1f8b1be57c" />
 <img width="476" height="476" alt="Screenshot 2026-05-31 at 03 02 41" src="https://github.com/user-attachments/assets/f7958606-68bd-4927-90b3-499047031351" />
 
+note: i am still using flutter 3.41.6
