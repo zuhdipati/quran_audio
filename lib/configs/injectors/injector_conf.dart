@@ -1,9 +1,8 @@
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
 import 'package:hive/hive.dart';
-import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:quran_audio/configs/adapters/adapter_conf.dart';
-import 'package:quran_audio/core/services/network_info.dart';
+import 'package:quran_audio/core/services/connectivity_service.dart';
 import 'package:quran_audio/features/quran/data/datasources/local_datasource.dart';
 import 'package:quran_audio/features/quran/data/datasources/remote_datasource.dart';
 import 'package:quran_audio/features/quran/data/repositories/quran_repository_impl.dart';
@@ -23,13 +22,9 @@ Future<void> initInjector() async {
 Future<void> configureDependencies(GetIt sl) async {
   // ==================== External ====================
   sl.registerLazySingleton<Dio>(() => Dio());
-  sl.registerLazySingleton<InternetConnection>(() => InternetConnection());
   sl.registerLazySingleton<Box>(() => Hive.box(quranBox));
-
-  // ==================== Core ====================
-  sl.registerLazySingleton<NetworkInfo>(
-    () => NetworkInfoImpl(connectionChecker: sl<InternetConnection>()),
-  );
+  sl.registerLazySingleton(() => ConnectivityService());
+  sl<ConnectivityService>().initialize();
 
   // ==================== Data Sources ====================
   sl.registerLazySingleton<QuranRemoteDataSource>(
@@ -45,7 +40,6 @@ Future<void> configureDependencies(GetIt sl) async {
     () => QuranRepositoryImpl(
       remoteDataSource: sl<QuranRemoteDataSource>(),
       localDataSource: sl<QuranLocalDataSource>(),
-      networkInfo: sl<NetworkInfo>(),
     ),
   );
 

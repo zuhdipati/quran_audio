@@ -1,7 +1,6 @@
 export 'package:hive/hive.dart';
 export 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 export 'package:quran_audio/configs/adapters/adapter_conf.dart';
-export 'package:quran_audio/core/services/network_info.dart';
 export 'package:quran_audio/features/quran/data/datasources/local_datasource.dart';
 export 'package:quran_audio/features/quran/data/datasources/remote_datasource.dart';
 export 'package:quran_audio/features/quran/data/repositories/quran_repository_impl.dart';

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
+import 'package:quran_audio/core/utils/toast_utils.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
@@ -42,6 +43,15 @@ class _SurahPageViewState extends State<SurahPageView> {
   }
 
   void _showEditionSelector(BuildContext context) async {
+    bool hasConnection = await InternetConnection().hasInternetAccess;
+
+    if (!hasConnection) {
+      ToastUtils.showError('Qori selection is disabled while offline');
+      return;
+    }
+
+    if (!context.mounted) return;
+
     final EditionBloc qoriBloc = context.read<EditionBloc>();
 
     qoriBloc.add(const SearchEditions(''));
@@ -195,7 +205,15 @@ class _SurahPageViewState extends State<SurahPageView> {
                           final surah = state.filteredSurahs[index];
                           return SurahTile(
                             surah: surah,
-                            onTap: () {
+                            onTap: () async {
+                              bool hasConnection =
+                                  await InternetConnection().hasInternetAccess;
+                              if (!hasConnection) {
+                                ToastUtils.showError(
+                                  'Audio playback is disabled while offline',
+                                );
+                                return;
+                              }
                               // TODO: Navigate to Player / Detail Surah
                             },
                           );
@@ -215,5 +233,5 @@ class _SurahPageViewState extends State<SurahPageView> {
         ],
       ),
     );
-  } 
+  }
 }
