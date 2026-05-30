@@ -1,15 +1,15 @@
 class AyahModel {
-  int number;
-  String text;
-  int numberInSurah;
-  int juz;
-  int manzil;
-  int page;
-  int ruku;
-  int hizbQuarter;
-  bool sajda;
+  final int number;
+  final String text;
+  final int numberInSurah;
+  final int juz;
+  final int manzil;
+  final int page;
+  final int ruku;
+  final int hizbQuarter;
+  final bool sajda;
 
-  AyahModel({
+  const AyahModel({
     required this.number,
     required this.text,
     required this.numberInSurah,
@@ -30,7 +30,7 @@ class AyahModel {
     page: json["page"],
     ruku: json["ruku"],
     hizbQuarter: json["hizbQuarter"],
-    sajda: json["sajda"],
+    sajda: json["sajda"] is bool ? json["sajda"] : json["sajda"] != null,
   );
 
   Map<String, dynamic> toJson() => {

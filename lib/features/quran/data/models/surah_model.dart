@@ -1,17 +1,18 @@
 import 'package:quran_audio/features/quran/data/models/ayah_model.dart';
 import 'package:quran_audio/features/quran/data/models/edition_model.dart';
+import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 
 class SurahModel {
-  int number;
-  String name;
-  String englishName;
-  String englishNameTranslation;
-  String revelationType;
-  int numberOfAyahs;
-  List<AyahModel> ayahs;
-  EditionModel edition;
+  final int number;
+  final String name;
+  final String englishName;
+  final String englishNameTranslation;
+  final String revelationType;
+  final int numberOfAyahs;
+  final List<AyahModel> ayahs;
+  final EditionModel edition;
 
-  SurahModel({
+  const SurahModel({
     required this.number,
     required this.name,
     required this.englishName,
@@ -45,4 +46,15 @@ class SurahModel {
     "ayahs": List<dynamic>.from(ayahs.map((x) => x.toJson())),
     "edition": edition.toJson(),
   };
+
+  SurahEntity toEntity() {
+    return SurahEntity(
+      number: number,
+      name: name,
+      englishName: englishName,
+      englishNameTranslation: englishNameTranslation,
+      revelationType: revelationType,
+      numberOfAyahs: numberOfAyahs,
+    );
+  }
 }

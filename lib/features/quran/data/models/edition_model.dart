@@ -1,20 +1,33 @@
-class EditionModel {
-  String identifier;
-  String language;
-  String name;
-  String englishName;
-  String format;
-  Type type;
-  dynamic direction;
+import 'package:hive/hive.dart';
+import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 
-  EditionModel({
+part 'edition_model.g.dart';
+
+@HiveType(typeId: 0)
+class EditionModel {
+  @HiveField(0)
+  final String identifier;
+  @HiveField(1)
+  final String language;
+  @HiveField(2)
+  final String name;
+  @HiveField(3)
+  final String englishName;
+  @HiveField(4)
+  final String format;
+  @HiveField(5)
+  final String type;
+  @HiveField(6)
+  final String? direction;
+
+  const EditionModel({
     required this.identifier,
     required this.language,
     required this.name,
     required this.englishName,
     required this.format,
     required this.type,
-    required this.direction,
+    this.direction,
   });
 
   factory EditionModel.fromJson(Map<String, dynamic> json) => EditionModel(
@@ -36,4 +49,13 @@ class EditionModel {
     "type": type,
     "direction": direction,
   };
+
+  EditionEntity toEntity() {
+    return EditionEntity(
+      identifier: identifier,
+      language: language,
+      name: name,
+      englishName: englishName,
+    );
+  }
 }
