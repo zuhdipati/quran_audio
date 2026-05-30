@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quran_audio/core/routes/app_routes.dart';
+import 'package:quran_audio/core/themes/app_themes.dart';
 
 void main() {
   runApp(const QuranAudioApp());
@@ -9,6 +11,9 @@ class QuranAudioApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp();
+    return MaterialApp.router(
+      routerConfig: AppRoutes().router,
+      theme: AppTheme.appTheme,
+    );
   }
 }
