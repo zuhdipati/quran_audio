@@ -6,37 +6,37 @@ part 'edition_model.g.dart';
 @HiveType(typeId: 0)
 class EditionModel {
   @HiveField(0)
-  final String identifier;
+  final String? identifier;
   @HiveField(1)
-  final String language;
+  final String? language;
   @HiveField(2)
-  final String name;
+  final String? name;
   @HiveField(3)
-  final String englishName;
+  final String? englishName;
   @HiveField(4)
-  final String format;
+  final String? format;
   @HiveField(5)
-  final String type;
+  final String? type;
   @HiveField(6)
   final String? direction;
 
   const EditionModel({
-    required this.identifier,
-    required this.language,
-    required this.name,
-    required this.englishName,
-    required this.format,
-    required this.type,
+    this.identifier,
+    this.language,
+    this.name,
+    this.englishName,
+    this.format,
+    this.type,
     this.direction,
   });
 
   factory EditionModel.fromJson(Map<String, dynamic> json) => EditionModel(
-    identifier: json["identifier"],
-    language: json["language"],
-    name: json["name"],
-    englishName: json["englishName"],
-    format: json["format"],
-    type: json["type"],
+    identifier: json["identifier"] ?? '',
+    language: json["language"] ?? '',
+    name: json["name"] ?? '',
+    englishName: json["englishName"] ?? '',
+    format: json["format"] ?? '',
+    type: json["type"] ?? '',
     direction: json["direction"],
   );
 
@@ -52,10 +52,10 @@ class EditionModel {
 
   EditionEntity toEntity() {
     return EditionEntity(
-      identifier: identifier,
-      language: language,
-      name: name,
-      englishName: englishName,
+      identifier: identifier ?? '',
+      language: language ?? '',
+      name: name ?? '',
+      englishName: englishName ?? '',
     );
   }
 }

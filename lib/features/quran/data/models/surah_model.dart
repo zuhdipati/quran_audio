@@ -24,16 +24,18 @@ class SurahModel {
   });
 
   factory SurahModel.fromJson(Map<String, dynamic> json) => SurahModel(
-    number: json["number"],
-    name: json["name"],
-    englishName: json["englishName"],
-    englishNameTranslation: json["englishNameTranslation"],
-    revelationType: json["revelationType"],
-    numberOfAyahs: json["numberOfAyahs"],
-    ayahs: List<AyahModel>.from(
-      json["ayahs"].map((x) => AyahModel.fromJson(x)),
-    ),
-    edition: EditionModel.fromJson(json["edition"]),
+    number: json["number"] ?? 0,
+    name: json["name"] ?? '',
+    englishName: json["englishName"] ?? '',
+    englishNameTranslation: json["englishNameTranslation"] ?? '',
+    revelationType: json["revelationType"] ?? '',
+    numberOfAyahs: json["numberOfAyahs"] ?? 0,
+    ayahs: json["ayahs"] != null
+        ? List<AyahModel>.from(json["ayahs"].map((x) => AyahModel.fromJson(x)))
+        : [],
+    edition: json["edition"] != null
+        ? EditionModel.fromJson(json["edition"])
+        : const EditionModel( ),
   );
 
   Map<String, dynamic> toJson() => {

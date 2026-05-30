@@ -22,15 +22,15 @@ class AyahModel {
   });
 
   factory AyahModel.fromJson(Map<String, dynamic> json) => AyahModel(
-    number: json["number"],
-    text: json["text"],
-    numberInSurah: json["numberInSurah"],
-    juz: json["juz"],
-    manzil: json["manzil"],
-    page: json["page"],
-    ruku: json["ruku"],
-    hizbQuarter: json["hizbQuarter"],
-    sajda: json["sajda"] is bool ? json["sajda"] : json["sajda"] != null,
+    number: json["number"] ?? 0,
+    text: json["text"] ?? '',
+    numberInSurah: json["numberInSurah"] ?? 0,
+    juz: json["juz"] ?? 0,
+    manzil: json["manzil"] ?? 0,
+    page: json["page"] ?? 0,
+    ruku: json["ruku"] ?? 0,
+    hizbQuarter: json["hizbQuarter"] ?? 0,
+    sajda: json["sajda"] is bool ? json["sajda"] : (json["sajda"] != null),
   );
 
   Map<String, dynamic> toJson() => {
