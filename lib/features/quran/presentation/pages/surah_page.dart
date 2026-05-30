@@ -134,9 +134,9 @@ class _SurahPageViewState extends State<SurahPageView> {
                               color: AppColors.primary,
                             ),
                             const SizedBox(width: 6),
-                            SizedBox(
-                              width: 120,
-                              child: Flexible(
+                            Flexible(
+                              child: SizedBox(
+                                width: 120,
                                 child: Text(
                                   'Qori: $editionName',
                                   maxLines: 1,
