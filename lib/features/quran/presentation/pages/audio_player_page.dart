@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
-import 'package:quran_audio/configs/injectors/injector_conf.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_event.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
 
-class AudioPlayerPage extends StatelessWidget {
+class AudioPlayerPage extends StatefulWidget {
   final SurahEntity surah;
   final String editionIdentifier;
   final List<SurahEntity> surahList;
@@ -21,23 +20,21 @@ class AudioPlayerPage extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
-    return BlocProvider<PlayerBloc>(
-      create: (context) => sl<PlayerBloc>()
-        ..add(
-          LoadSurah(
-            surah,
-            editionIdentifier: editionIdentifier,
-            surahList: surahList,
-          ),
-        ),
-      child: const AudioPlayerView(),
-    );
-  }
+  State<AudioPlayerPage> createState() => _AudioPlayerPageState();
 }
 
-class AudioPlayerView extends StatelessWidget {
-  const AudioPlayerView({super.key});
+class _AudioPlayerPageState extends State<AudioPlayerPage> {
+  @override
+  void initState() {
+    super.initState();
+    context.read<PlayerBloc>().add(
+      LoadSurah(
+        widget.surah,
+        editionIdentifier: widget.editionIdentifier,
+        surahList: widget.surahList,
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,19 +64,11 @@ class AudioPlayerView extends StatelessWidget {
             );
           },
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.more_horiz, color: AppColors.black),
-            onPressed: () {},
-          ),
-        ],
       ),
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
         child: Column(
           children: [
-            
-            // Green Box with Logo
             Expanded(
               child: Container(
                 width: double.infinity,
@@ -104,8 +93,6 @@ class AudioPlayerView extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 40),
-
-            // Progress Bar
             BlocBuilder<PlayerBloc, PlayerState>(
               builder: (context, state) {
                 return ProgressBar(
@@ -125,14 +112,11 @@ class AudioPlayerView extends StatelessWidget {
               },
             ),
             const SizedBox(height: 20),
-
-            // Controls
             BlocBuilder<PlayerBloc, PlayerState>(
               builder: (context, state) {
                 return Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Rewind 10s
                     IconButton(
                       icon: const Icon(
                         Icons.replay_10,
@@ -149,7 +133,6 @@ class AudioPlayerView extends StatelessWidget {
                         );
                       },
                     ),
-                    // Previous Surah
                     IconButton(
                       icon: Icon(
                         Icons.skip_previous,
@@ -163,7 +146,6 @@ class AudioPlayerView extends StatelessWidget {
                                 context.read<PlayerBloc>().add(PreviousSurah())
                           : null,
                     ),
-                    // Play / Pause
                     GestureDetector(
                       onTap: () {
                         if (state.status == PlayerStatus.playing) {
@@ -184,8 +166,6 @@ class AudioPlayerView extends StatelessWidget {
                         child: _buildPlayPauseIcon(state.status),
                       ),
                     ),
-
-                    // Next Surah
                     IconButton(
                       icon: Icon(
                         Icons.skip_next,
@@ -198,7 +178,6 @@ class AudioPlayerView extends StatelessWidget {
                           ? () => context.read<PlayerBloc>().add(NextSurah())
                           : null,
                     ),
-                    // Forward 10s
                     IconButton(
                       icon: const Icon(
                         Icons.forward_10,
@@ -220,8 +199,6 @@ class AudioPlayerView extends StatelessWidget {
               },
             ),
             const SizedBox(height: 30),
-
-            // Bottom Surah Info Bar
             BlocBuilder<PlayerBloc, PlayerState>(
               builder: (context, state) {
                 final surah = state.currentSurah;
@@ -264,18 +241,18 @@ class AudioPlayerView extends StatelessWidget {
       ),
     );
   }
+}
 
-  Widget _buildPlayPauseIcon(PlayerStatus status) {
-    if (status == PlayerStatus.loading) {
-      return const SizedBox(
-        width: 32,
-        height: 32,
-        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
-      );
-    } else if (status == PlayerStatus.playing) {
-      return const Icon(Icons.pause, size: 32, color: Colors.white);
-    } else {
-      return const Icon(Icons.play_arrow, size: 32, color: Colors.white);
-    }
+Widget _buildPlayPauseIcon(PlayerStatus status) {
+  if (status == PlayerStatus.loading) {
+    return const SizedBox(
+      width: 32,
+      height: 32,
+      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+    );
+  } else if (status == PlayerStatus.playing) {
+    return const Icon(Icons.pause, size: 32, color: Colors.white);
+  } else {
+    return const Icon(Icons.play_arrow, size: 32, color: Colors.white);
   }
 }

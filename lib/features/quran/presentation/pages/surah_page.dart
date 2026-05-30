@@ -57,13 +57,21 @@ class _SurahPageViewState extends State<SurahPageView> {
 
     qoriBloc.add(const SearchEditions(''));
 
+    final surahListState = context.read<SurahListBloc>().state;
+    EditionEntity? currentEdition;
+    if (surahListState is SurahListLoaded) {
+      currentEdition = surahListState.currentEdition;
+    } else if (surahListState is SurahListLoading) {
+      currentEdition = surahListState.currentEdition;
+    }
+
     final selectedEdition = await showModalBottomSheet<EditionEntity>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       builder: (_) => BlocProvider.value(
         value: qoriBloc,
-        child: const EditionBottomSheet(),
+        child: EditionBottomSheet(currentEdition: currentEdition),
       ),
     );
 
@@ -131,15 +139,18 @@ class _SurahPageViewState extends State<SurahPageView> {
                                   color: AppColors.primary,
                                 ),
                                 const SizedBox(width: 6),
-                                Flexible(
-                                  child: Text(
-                                    'Qori: $editionName',
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 14,
+                                SizedBox(
+                                  width: 120,
+                                  child: Flexible(
+                                    child: Text(
+                                      'Qori: $editionName',
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        color: AppColors.primary,
+                                        fontWeight: FontWeight.w600,
+                                        fontSize: 14,
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -207,7 +218,8 @@ class _SurahPageViewState extends State<SurahPageView> {
                           return SurahTile(
                             surah: surah,
                             onTap: () async {
-                              bool hasConnection = await InternetConnection().hasInternetAccess;
+                              bool hasConnection =
+                                  await InternetConnection().hasInternetAccess;
                               if (!hasConnection) {
                                 ToastUtils.showError(
                                   'Audio playback is disabled while offline',
@@ -215,11 +227,15 @@ class _SurahPageViewState extends State<SurahPageView> {
                                 return;
                               }
                               if (context.mounted) {
-                                context.push('/player', extra: {
-                                  'surah': surah,
-                                  'editionIdentifier': state.currentEdition.identifier,
-                                  'surahList': state.allSurahs,
-                                });
+                                context.push(
+                                  '/player',
+                                  extra: {
+                                    'surah': surah,
+                                    'editionIdentifier':
+                                        state.currentEdition.identifier,
+                                    'surahList': state.allSurahs,
+                                  },
+                                );
                               }
                             },
                           );

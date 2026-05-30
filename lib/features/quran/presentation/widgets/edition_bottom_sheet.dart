@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
 
 class EditionBottomSheet extends StatelessWidget {
-  const EditionBottomSheet({super.key});
+  final EditionEntity? currentEdition;
+
+  const EditionBottomSheet({super.key, this.currentEdition});
 
   @override
   Widget build(BuildContext context) {
@@ -70,22 +73,47 @@ class EditionBottomSheet extends StatelessWidget {
                         const Divider(height: 1, color: AppColors.lightGrey),
                     itemBuilder: (context, index) {
                       final edition = state.filteredEditions[index];
-                      return ListTile(
-                        contentPadding: EdgeInsets.zero,
-                        title: Text(
-                          edition.englishName,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
-                        ),
-                        subtitle: Text(
-                          '${edition.name} • ${edition.language}',
-                          style: const TextStyle(
-                            color: AppColors.textGrey,
-                            fontSize: 12,
+                      final isSelected =
+                          currentEdition?.identifier == edition.identifier;
+
+                      return Container(
+                        color: isSelected
+                            ? AppColors.primary.withValues(alpha: 0.1)
+                            : Colors.transparent,
+                        child: ListTile(
+                          contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16,
                           ),
+                          title: Text(
+                            edition.englishName,
+                            style: TextStyle(
+                              fontWeight: isSelected
+                                  ? FontWeight.bold
+                                  : FontWeight.w600,
+                              color: isSelected
+                                  ? AppColors.primary
+                                  : AppColors.black,
+                            ),
+                          ),
+                          subtitle: Text(
+                            '${edition.name} • ${edition.language}',
+                            style: TextStyle(
+                              color: isSelected
+                                  ? AppColors.primary.withValues(alpha: 0.7)
+                                  : AppColors.textGrey,
+                              fontSize: 12,
+                            ),
+                          ),
+                          trailing: isSelected
+                              ? const Icon(
+                                  Icons.check_circle,
+                                  color: AppColors.primary,
+                                )
+                              : null,
+                          onTap: () {
+                            Navigator.pop(context, edition);
+                          },
                         ),
-                        onTap: () {
-                          Navigator.pop(context, edition);
-                        },
                       );
                     },
                   );

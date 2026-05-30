@@ -12,8 +12,8 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   StreamSubscription? _playerStateSub;
 
   PlayerBloc({ja.AudioPlayer? audioPlayer})
-      : _audioPlayer = audioPlayer ?? ja.AudioPlayer(),
-        super(const PlayerState()) {
+    : _audioPlayer = audioPlayer ?? ja.AudioPlayer(),
+      super(const PlayerState()) {
     on<LoadSurah>(_onLoadSurah);
     on<PlayAudio>(_onPlayAudio);
     on<PauseAudio>(_onPauseAudio);
@@ -52,12 +52,14 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
   Future<void> _onLoadSurah(LoadSurah event, Emitter<PlayerState> emit) async {
     try {
-      emit(state.copyWith(
-        status: PlayerStatus.loading,
-        currentSurah: event.surah,
-        editionIdentifier: event.editionIdentifier,
-        surahList: event.surahList,
-      ));
+      emit(
+        state.copyWith(
+          status: PlayerStatus.loading,
+          currentSurah: event.surah,
+          editionIdentifier: event.editionIdentifier,
+          surahList: event.surahList,
+        ),
+      );
 
       final audioUrl = _buildAudioUrl(
         event.editionIdentifier,
@@ -72,14 +74,15 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
       emit(state.copyWith(status: PlayerStatus.paused));
 
-      // Auto play when loaded
       add(PlayAudio());
     } catch (e, stack) {
       AppLogger.e('Error loading audio', error: e, stackTrace: stack);
-      emit(state.copyWith(
-        status: PlayerStatus.error,
-        errorMessage: 'Failed to load audio',
-      ));
+      emit(
+        state.copyWith(
+          status: PlayerStatus.error,
+          errorMessage: 'Failed to load audio',
+        ),
+      );
     }
   }
 
@@ -88,12 +91,18 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     await _audioPlayer.play();
   }
 
-  Future<void> _onPauseAudio(PauseAudio event, Emitter<PlayerState> emit) async {
+  Future<void> _onPauseAudio(
+    PauseAudio event,
+    Emitter<PlayerState> emit,
+  ) async {
     emit(state.copyWith(status: PlayerStatus.paused));
     await _audioPlayer.pause();
   }
 
-  Future<void> _onResumeAudio(ResumeAudio event, Emitter<PlayerState> emit) async {
+  Future<void> _onResumeAudio(
+    ResumeAudio event,
+    Emitter<PlayerState> emit,
+  ) async {
     emit(state.copyWith(status: PlayerStatus.playing));
     await _audioPlayer.play();
   }
@@ -104,24 +113,31 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       (s) => s.number == state.currentSurah!.number,
     );
     final nextSurah = state.surahList[currentIndex + 1];
-    add(LoadSurah(
-      nextSurah,
-      editionIdentifier: state.editionIdentifier,
-      surahList: state.surahList,
-    ));
+    add(
+      LoadSurah(
+        nextSurah,
+        editionIdentifier: state.editionIdentifier,
+        surahList: state.surahList,
+      ),
+    );
   }
 
-  Future<void> _onPreviousSurah(PreviousSurah event, Emitter<PlayerState> emit) async {
+  Future<void> _onPreviousSurah(
+    PreviousSurah event,
+    Emitter<PlayerState> emit,
+  ) async {
     if (!state.hasPreviousSurah) return;
     final currentIndex = state.surahList.indexWhere(
       (s) => s.number == state.currentSurah!.number,
     );
     final prevSurah = state.surahList[currentIndex - 1];
-    add(LoadSurah(
-      prevSurah,
-      editionIdentifier: state.editionIdentifier,
-      surahList: state.surahList,
-    ));
+    add(
+      LoadSurah(
+        prevSurah,
+        editionIdentifier: state.editionIdentifier,
+        surahList: state.surahList,
+      ),
+    );
   }
 
   Future<void> _onSeekAudio(SeekAudio event, Emitter<PlayerState> emit) async {
@@ -137,10 +153,22 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   }
 
   void _onAudioCompleted(AudioCompleted event, Emitter<PlayerState> emit) {
-    emit(state.copyWith(
-      status: PlayerStatus.completed,
-      position: state.duration,
-    ));
+    emit(
+      state.copyWith(status: PlayerStatus.completed, position: state.duration),
+    );
+
+    if (!state.hasNextSurah) return;
+    final currentIndex = state.surahList.indexWhere(
+      (s) => s.number == state.currentSurah!.number,
+    );
+    final nextSurah = state.surahList[currentIndex + 1];
+    add(
+      LoadSurah(
+        nextSurah,
+        editionIdentifier: state.editionIdentifier,
+        surahList: state.surahList,
+      ),
+    );
   }
 
   Future<void> _onStopAudio(StopAudio event, Emitter<PlayerState> emit) async {

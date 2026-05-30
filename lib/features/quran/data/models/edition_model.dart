@@ -44,9 +44,11 @@ class EditionModel {
     // extract language from prefix (e.g. "ar" from "ar.alafasy")
     final dotIndex = identifier.indexOf('.');
     final language = dotIndex >= 0 ? identifier.substring(0, dotIndex) : '';
-    
+
     // generate a readable name from identifier
-    final rawName = dotIndex >= 0 ? identifier.substring(dotIndex + 1) : identifier;
+    final rawName = dotIndex >= 0
+        ? identifier.substring(dotIndex + 1)
+        : identifier;
     final englishName = rawName.isNotEmpty
         ? rawName[0].toUpperCase() + rawName.substring(1)
         : identifier;

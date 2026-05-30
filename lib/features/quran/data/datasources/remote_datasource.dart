@@ -50,8 +50,9 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
             .map((dir) => EditionModel.fromIdentifier(dir['name'] as String))
             .toList();
 
-        editions.sort((a, b) =>
-            (a.englishName ?? '').compareTo(b.englishName ?? ''));
+        editions.sort(
+          (a, b) => (a.englishName ?? '').compareTo(b.englishName ?? ''),
+        );
 
         return editions;
       } else {

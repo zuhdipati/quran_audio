@@ -24,13 +24,17 @@ class PlayerState extends Equatable {
 
   bool get hasNextSurah {
     if (currentSurah == null || surahList.isEmpty) return false;
-    final currentIndex = surahList.indexWhere((s) => s.number == currentSurah!.number);
+    final currentIndex = surahList.indexWhere(
+      (s) => s.number == currentSurah!.number,
+    );
     return currentIndex >= 0 && currentIndex < surahList.length - 1;
   }
 
   bool get hasPreviousSurah {
     if (currentSurah == null || surahList.isEmpty) return false;
-    final currentIndex = surahList.indexWhere((s) => s.number == currentSurah!.number);
+    final currentIndex = surahList.indexWhere(
+      (s) => s.number == currentSurah!.number,
+    );
     return currentIndex > 0;
   }
 
@@ -56,12 +60,12 @@ class PlayerState extends Equatable {
 
   @override
   List<Object?> get props => [
-        status,
-        currentSurah,
-        editionIdentifier,
-        surahList,
-        position,
-        duration,
-        errorMessage,
-      ];
+    status,
+    currentSurah,
+    editionIdentifier,
+    surahList,
+    position,
+    duration,
+    errorMessage,
+  ];
 }

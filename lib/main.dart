@@ -6,6 +6,7 @@ import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
+import 'package:quran_audio/features/quran/presentation/bloc/player/player_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_list_bloc.dart';
 
 void main() async {
@@ -39,6 +40,7 @@ class QuranAudioApp extends StatelessWidget {
       providers: [
         BlocProvider<EditionBloc>(create: (context) => sl<EditionBloc>()),
         BlocProvider<SurahListBloc>(create: (context) => sl<SurahListBloc>()),
+        BlocProvider<PlayerBloc>(create: (context) => sl<PlayerBloc>()),
       ],
       child: MaterialApp.router(
         routerConfig: AppRoutes().router,
