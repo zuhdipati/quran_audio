@@ -29,7 +29,7 @@ This project strictly adheres to **Clean Architecture** principles and uses **BL
 * **[get_it](https://pub.dev/packages/get_it)**: For Dependency Injection (DI) and Service Locator implementation.
 * **[go_router](https://pub.dev/packages/go_router)**: For declarative routing and navigation.
 * **[internet_connection_checker_plus](https://pub.dev/packages/internet_connection_checker_plus)**: To monitor network connectivity status.
-* * **Testing (`flutter_test`, `mocktail`, `bloc_test`)**: Ensuring high reliability with nearly 100% test coverage across Unit and Widget tests.
+* **Testing (`flutter_test`, `mocktail`, `bloc_test`)**: Ensuring high reliability with nearly 100% test coverage across Unit and Widget tests.
 
 ### APIs & Data Sources
 1. **[Al Quran Cloud API](https://alquran.cloud/api)**: Used to fetch the metadata and list of Surahs (`/quran/{edition}`).
