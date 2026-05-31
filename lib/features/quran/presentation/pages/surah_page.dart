@@ -9,6 +9,7 @@ import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_blo
 import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_list_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/edition_bottom_sheet.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/surah_tile.dart';
+import 'package:quran_audio/core/utils/qori_name_formatter.dart';
 
 class SurahPage extends StatelessWidget {
   const SurahPage({super.key});
@@ -134,18 +135,16 @@ class _SurahPageViewState extends State<SurahPageView> {
                               color: AppColors.primary,
                             ),
                             const SizedBox(width: 6),
-                            Flexible(
-                              child: SizedBox(
-                                width: 120,
-                                child: Text(
-                                  'Qori: $editionName',
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 14,
-                                  ),
+                            ConstrainedBox(
+                              constraints: const BoxConstraints(maxWidth: 120),
+                              child: Text(
+                                'Qori: ${editionName.formatQoriName}',
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w600,
+                                  fontSize: 14,
                                 ),
                               ),
                             ),

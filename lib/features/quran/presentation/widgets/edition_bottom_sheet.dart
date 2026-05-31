@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
+import 'package:quran_audio/core/utils/qori_name_formatter.dart';
 
 class EditionBottomSheet extends StatelessWidget {
   final EditionEntity? currentEdition;
@@ -85,7 +86,7 @@ class EditionBottomSheet extends StatelessWidget {
                             horizontal: 16,
                           ),
                           title: Text(
-                            edition.englishName,
+                            edition.englishName.formatQoriName,
                             style: TextStyle(
                               fontWeight: isSelected
                                   ? FontWeight.bold
@@ -96,7 +97,7 @@ class EditionBottomSheet extends StatelessWidget {
                             ),
                           ),
                           subtitle: Text(
-                            '${edition.name} • ${edition.language}',
+                            '${edition.name.formatQoriName} • ${edition.language}',
                             style: TextStyle(
                               color: isSelected
                                   ? AppColors.primary.withValues(alpha: 0.7)

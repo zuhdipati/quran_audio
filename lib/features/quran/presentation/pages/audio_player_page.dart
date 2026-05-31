@@ -73,8 +73,15 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
               child: Container(
                 width: double.infinity,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
-                  borderRadius: BorderRadius.circular(24.0),
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [
+                      AppColors.primary.withValues(alpha: 0.6),
+                      AppColors.primary,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(32.0),
                   boxShadow: [
                     BoxShadow(
                       color: AppColors.primary.withValues(alpha: 0.3),
@@ -83,11 +90,55 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
                     ),
                   ],
                 ),
-                child: const Center(
-                  child: Icon(
-                    Icons.menu_book_rounded,
-                    size: 80,
-                    color: Colors.white,
+                child: Center(
+                  child: BlocBuilder<PlayerBloc, PlayerState>(
+                    builder: (context, state) {
+                      final surah = state.currentSurah;
+                      return Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(32),
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.15),
+                            ),
+                            child: const Icon(
+                              Icons.audiotrack_rounded,
+                              size: 72,
+                              color: Colors.white,
+                            ),
+                          ),
+                          const SizedBox(height: 32),
+                          Text(
+                            surah?.name ?? '',
+                            textDirection: TextDirection.rtl,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 36,
+                              shadows: [
+                                Shadow(
+                                  color: Colors.black26,
+                                  blurRadius: 10,
+                                  offset: Offset(0, 2),
+                                )
+                              ],
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            surah?.englishName ?? 'Loading...',
+                            style: TextStyle(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              fontWeight: FontWeight.w500,
+                              fontSize: 20,
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                 ),
               ),
@@ -198,44 +249,7 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
                 );
               },
             ),
-            const SizedBox(height: 30),
-            BlocBuilder<PlayerBloc, PlayerState>(
-              builder: (context, state) {
-                final surah = state.currentSurah;
-                return Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary,
-                    borderRadius: BorderRadius.circular(16.0),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        surah?.englishName ?? 'Loading...',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        surah?.name ?? '',
-                        textDirection: TextDirection.rtl,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20,
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
+
           ],
         ),
       ),
