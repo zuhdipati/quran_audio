@@ -4,11 +4,19 @@ import 'package:quran_audio/core/widgets/celestial_loader.dart';
 
 class LoadingView extends StatelessWidget {
   final double size;
+  final Color color;
+  final Color starColor;
 
-  const LoadingView({super.key, this.size = 34});
+  const LoadingView({
+    super.key,
+    this.size = 34,
+    this.color = AppColors.primary,
+    this.starColor = AppColors.starlight,
+  });
 
   @override
-  Widget build(BuildContext context) => CelestialLoader(size: size);
+  Widget build(BuildContext context) =>
+      CelestialLoader(size: size, color: color, starColor: starColor);
 }
 
 class MessageView extends StatelessWidget {

@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:quran_audio/core/widgets/entrance.dart';
+import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 
 /// Records haptic calls so tests can assert feedback fired without a device.
@@ -44,6 +45,45 @@ void main() {
 
       expect(tester.binding.transientCallbackCount, 0);
       expect(find.byType(CelestialLoader), findsOneWidget);
+    });
+
+    testWidgets('takes the tint it is given', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          const CelestialLoader(
+            size: 20,
+            color: Color(0xFF112233),
+            starColor: Color(0xFF445566),
+          ),
+        ),
+      );
+
+      final loader = tester.widget<CelestialLoader>(
+        find.byType(CelestialLoader),
+      );
+      expect(loader.color, const Color(0xFF112233));
+      expect(loader.starColor, const Color(0xFF445566));
+    });
+  });
+
+  group('LoadingView', () {
+    testWidgets('forwards size and tint to the loader', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          const LoadingView(
+            size: 26,
+            color: Color(0xFFAABBCC),
+            starColor: Color(0xFFDDEEFF),
+          ),
+        ),
+      );
+
+      final loader = tester.widget<CelestialLoader>(
+        find.byType(CelestialLoader),
+      );
+      expect(loader.size, 26);
+      expect(loader.color, const Color(0xFFAABBCC));
+      expect(loader.starColor, const Color(0xFFDDEEFF));
     });
   });
 

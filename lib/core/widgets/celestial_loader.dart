@@ -11,7 +11,19 @@ import 'package:quran_audio/core/themes/app_colors.dart';
 class CelestialLoader extends StatefulWidget {
   final double size;
 
-  const CelestialLoader({super.key, this.size = 34});
+  /// Crescent colour. Defaults to the app accent.
+  final Color color;
+
+  /// Orbiting stars. Defaults to starlight; tint it to match [color] when
+  /// the loader sits on a filled surface rather than on the sky.
+  final Color starColor;
+
+  const CelestialLoader({
+    super.key,
+    this.size = 34,
+    this.color = AppColors.primary,
+    this.starColor = AppColors.starlight,
+  });
 
   @override
   State<CelestialLoader> createState() => _CelestialLoaderState();
@@ -50,8 +62,13 @@ class _CelestialLoaderState extends State<CelestialLoader>
         child: RepaintBoundary(
           child: AnimatedBuilder(
             animation: _controller,
-            builder: (context, _) =>
-                CustomPaint(painter: _CelestialPainter(_controller.value)),
+            builder: (context, _) => CustomPaint(
+              painter: _CelestialPainter(
+                progress: _controller.value,
+                color: widget.color,
+                starColor: widget.starColor,
+              ),
+            ),
           ),
         ),
       ),
@@ -63,8 +80,14 @@ class _CelestialPainter extends CustomPainter {
   static const _starCount = 8;
 
   final double progress;
+  final Color color;
+  final Color starColor;
 
-  const _CelestialPainter(this.progress);
+  const _CelestialPainter({
+    required this.progress,
+    required this.color,
+    required this.starColor,
+  });
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -72,6 +95,7 @@ class _CelestialPainter extends CustomPainter {
     final center = size.center(Offset.zero);
 
     _paintCrescent(canvas, center, extent * 0.2);
+
 
     final orbit = extent * 0.41;
     final baseRadius = extent * 0.055;
@@ -90,9 +114,7 @@ class _CelestialPainter extends CustomPainter {
         position,
         baseRadius * (0.55 + 0.45 * intensity),
         Paint()
-          ..color = AppColors.starlight.withValues(
-            alpha: 0.18 + 0.82 * intensity,
-          ),
+          ..color = starColor.withValues(alpha: 0.18 + 0.82 * intensity),
       );
     }
   }
@@ -110,11 +132,13 @@ class _CelestialPainter extends CustomPainter {
 
     canvas.drawPath(
       Path.combine(PathOperation.difference, disc, bite),
-      Paint()..color = AppColors.primary,
+      Paint()..color = color,
     );
   }
 
   @override
   bool shouldRepaint(_CelestialPainter oldDelegate) =>
-      oldDelegate.progress != progress;
+      oldDelegate.progress != progress ||
+      oldDelegate.color != color ||
+      oldDelegate.starColor != starColor;
 }

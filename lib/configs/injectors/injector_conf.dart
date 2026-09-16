@@ -13,6 +13,7 @@ import 'package:quran_audio/features/dua/domain/usecases/get_duas.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/daily_dua/daily_dua_bloc.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/dua/dua_bloc.dart';
 import 'package:quran_audio/features/hadith/data/datasources/hadith_local_datasource.dart';
+import 'package:quran_audio/features/hadith/data/datasources/hadith_remote_datasource.dart';
 import 'package:quran_audio/features/hadith/data/repositories/hadith_repository_impl.dart';
 import 'package:quran_audio/features/hadith/domain/repositories/hadith_repository.dart';
 import 'package:quran_audio/features/hadith/domain/usecases/get_hadith_collection.dart';
@@ -109,7 +110,13 @@ Future<void> configureDependencies(GetIt sl) async {
     () => DuaLocalDataSourceImpl(loader: sl()),
   );
   sl.registerLazySingleton<HadithLocalDataSource>(
-    () => HadithLocalDataSourceImpl(loader: sl()),
+    () => HadithLocalDataSourceImpl(
+      loader: sl(),
+      box: sl<Box>(instanceName: appBox),
+    ),
+  );
+  sl.registerLazySingleton<HadithRemoteDataSource>(
+    () => HadithRemoteDataSourceImpl(dio: sl()),
   );
   sl.registerLazySingleton<TasbeehLocalDataSource>(
     () => TasbeehLocalDataSourceImpl(
@@ -150,7 +157,7 @@ Future<void> configureDependencies(GetIt sl) async {
     () => DuaRepositoryImpl(localDataSource: sl()),
   );
   sl.registerLazySingleton<HadithRepository>(
-    () => HadithRepositoryImpl(localDataSource: sl()),
+    () => HadithRepositoryImpl(localDataSource: sl(), remoteDataSource: sl()),
   );
   sl.registerLazySingleton<TasbeehRepository>(
     () => TasbeehRepositoryImpl(localDataSource: sl()),
@@ -173,7 +180,8 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerLazySingleton(() => WatchCompassHeading(sl()));
   sl.registerLazySingleton(() => GetDuas(sl()));
   sl.registerLazySingleton(() => GetDailyDua(sl()));
-  sl.registerLazySingleton(() => GetHadithCollection(sl()));
+  sl.registerLazySingleton(() => GetHadithCollections(sl()));
+  sl.registerLazySingleton(() => GetHadithPage(sl()));
   sl.registerLazySingleton(() => GetDzikirList(sl()));
   sl.registerLazySingleton(() => GetTasbeehCounts(sl()));
   sl.registerLazySingleton(() => SaveTasbeehCount(sl()));
@@ -200,7 +208,9 @@ Future<void> configureDependencies(GetIt sl) async {
   );
   sl.registerFactory(() => DuaBloc(getDuas: sl()));
   sl.registerFactory(() => DailyDuaBloc(getDailyDua: sl()));
-  sl.registerFactory(() => HadithBloc(getHadithCollection: sl()));
+  sl.registerFactory(
+    () => HadithBloc(getHadithCollections: sl(), getHadithPage: sl()),
+  );
   sl.registerFactory(
     () => TasbeehBloc(
       getDzikirList: sl(),

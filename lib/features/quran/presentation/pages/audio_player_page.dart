@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/haptics.dart';
+import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
@@ -315,13 +316,10 @@ class _Controls extends StatelessWidget {
 
 Widget _buildPlayPauseIcon(PlayerStatus status) {
   if (status == PlayerStatus.loading) {
-    return const SizedBox(
-      width: 26,
-      height: 26,
-      child: CircularProgressIndicator(
-        color: AppColors.onPrimary,
-        strokeWidth: 2.5,
-      ),
+    return const CelestialLoader(
+      size: 26,
+      color: AppColors.onPrimary,
+      starColor: AppColors.onPrimary,
     );
   } else if (status == PlayerStatus.playing) {
     return const Icon(Icons.pause, size: 34, color: AppColors.onPrimary);

@@ -7,9 +7,26 @@ sealed class HadithEvent extends Equatable {
   List<Object?> get props => [];
 }
 
-class HadithsRequested extends HadithEvent {}
+/// Load the narrator catalogue and open the first collection.
+final class HadithsRequested extends HadithEvent {
+  const HadithsRequested();
+}
 
-class HadithSearchChanged extends HadithEvent {
+final class HadithCollectionSelected extends HadithEvent {
+  final HadithCollectionEntity collection;
+
+  const HadithCollectionSelected(this.collection);
+
+  @override
+  List<Object?> get props => [collection];
+}
+
+/// Pull the next chunk of the open collection.
+final class HadithNextPageRequested extends HadithEvent {
+  const HadithNextPageRequested();
+}
+
+final class HadithSearchChanged extends HadithEvent {
   final String query;
 
   const HadithSearchChanged(this.query);

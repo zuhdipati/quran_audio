@@ -4,6 +4,7 @@ import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/date_time_utils.dart';
 import 'package:quran_audio/core/utils/toast_utils.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
+import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/daily_dua/daily_dua_bloc.dart';
 import 'package:quran_audio/features/home/presentation/widgets/daily_dua_card.dart';
@@ -152,10 +153,7 @@ class _PrayerOverview extends StatelessWidget {
                         state.message ?? 'Unable to load prayer times',
                         style: const TextStyle(color: AppColors.textSecondary),
                       )
-                    : const CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: AppColors.primary,
-                      ),
+                    : const LoadingView(),
               ),
             ),
           );

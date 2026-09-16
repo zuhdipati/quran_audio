@@ -18,18 +18,21 @@ class HadithDetailPage extends StatelessWidget {
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
-            hadith.title,
+            // only the bundled Arbain has titles
+            hadith.title ?? 'Hadith No. ${hadith.number}',
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
               height: 1.3,
             ),
           ),
-          const SizedBox(height: 4),
-          const Text(
-            'Hadits Arbain An-Nawawi',
-            style: TextStyle(color: AppColors.primary, fontSize: 13),
-          ),
+          if (hadith.source != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              hadith.source!,
+              style: const TextStyle(color: AppColors.primary, fontSize: 13),
+            ),
+          ],
           const SizedBox(height: 20),
           SurfaceCard(
             padding: const EdgeInsets.all(20),

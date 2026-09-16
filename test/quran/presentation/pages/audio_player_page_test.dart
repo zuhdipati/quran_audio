@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/ambient/ambient_bloc.dart';
@@ -103,7 +104,7 @@ void main() {
 
       // Verify UI elements
       expect(find.text('Surah Al-Fatihah'), findsOneWidget);
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CelestialLoader), findsOneWidget);
     });
 
     testWidgets(

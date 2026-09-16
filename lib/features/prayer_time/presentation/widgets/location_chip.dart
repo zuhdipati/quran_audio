@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:quran_audio/features/prayer_time/presentation/bloc/prayer_time/prayer_time_bloc.dart';
 
 /// Shows the city used for prayer times; tap to use the device location.
@@ -37,13 +38,7 @@ class LocationChip extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 isLoading
-                    ? const SizedBox.square(
-                        dimension: 12,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 1.5,
-                          color: AppColors.primary,
-                        ),
-                      )
+                    ? const CelestialLoader(size: 16)
                     : const Icon(
                         Icons.place_outlined,
                         size: 14,
