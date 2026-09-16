@@ -7,6 +7,7 @@ import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/toast_utils.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/core/widgets/search_field.dart';
+import 'package:quran_audio/core/widgets/entrance.dart';
 import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
@@ -153,7 +154,7 @@ class _SurahPageViewState extends State<SurahPageView> {
                     ),
                     itemBuilder: (context, index) {
                       final surah = state.filteredSurahs[index];
-                      return SurahTile(
+                      final tile = SurahTile(
                         surah: surah,
                         onTap: () async {
                           bool hasConnection =
@@ -181,6 +182,7 @@ class _SurahPageViewState extends State<SurahPageView> {
                           }
                         },
                       );
+                      return StaggeredEntrance(index: index, child: tile);
                     },
                   );
                 } else if (state is SurahListError) {

@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
@@ -74,7 +75,7 @@ void main() {
 
         await tester.pumpWidget(makeTestableWidget(const SurahPage()));
 
-        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+        expect(find.byType(CelestialLoader), findsOneWidget);
       },
     );
 
@@ -129,7 +130,7 @@ void main() {
         makeTestableWidget(const EditionBottomSheet(currentEdition: tEdition)),
       );
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(CelestialLoader), findsOneWidget);
     });
 
     testWidgets('should show list of qori when data is loaded successfully', (

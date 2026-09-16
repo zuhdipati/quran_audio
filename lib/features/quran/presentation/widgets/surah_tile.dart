@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/themes/app_themes.dart';
+import 'package:quran_audio/core/utils/haptics.dart';
 import 'package:quran_audio/core/utils/arabic_number_utils.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 
@@ -15,7 +16,10 @@ class SurahTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
-      onTap: onTap,
+      onTap: () {
+        Haptics.select();
+        onTap();
+      },
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(

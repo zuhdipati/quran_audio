@@ -5,6 +5,7 @@ import 'package:quran_audio/core/routes/route_paths.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/core/widgets/search_field.dart';
+import 'package:quran_audio/core/widgets/entrance.dart';
 import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/dua/dua_bloc.dart';
 import 'package:quran_audio/features/dua/presentation/widgets/dua_tile.dart';
@@ -59,10 +60,13 @@ class _DuaPageState extends State<DuaPage> {
                       separatorBuilder: (_, _) => const SizedBox(height: 10),
                       itemBuilder: (context, index) {
                         final dua = state.filteredDuas[index];
-                        return DuaTile(
-                          dua: dua,
-                          onTap: () =>
-                              context.push(RoutePaths.duaDetail, extra: dua),
+                        return StaggeredEntrance(
+                          index: index,
+                          child: DuaTile(
+                            dua: dua,
+                            onTap: () =>
+                                context.push(RoutePaths.duaDetail, extra: dua),
+                          ),
                         );
                       },
                     );

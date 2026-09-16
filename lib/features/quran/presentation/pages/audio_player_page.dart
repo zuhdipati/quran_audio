@@ -4,6 +4,7 @@ import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/core/utils/haptics.dart';
 import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
@@ -73,7 +74,12 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
           builder: (context, constraints) {
             final compact = constraints.maxHeight < 640;
             return Padding(
-              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              padding: EdgeInsets.fromLTRB(
+                24,
+                0,
+                24,
+                16 + MediaQuery.paddingOf(context).bottom,
+              ),
               child: Column(
                 children: [
                   Expanded(
@@ -221,6 +227,7 @@ class _Controls extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
               onPressed: () {
+                Haptics.select();
                 final newPos = state.position - const Duration(seconds: 10);
                 context.read<PlayerBloc>().add(
                   SeekAudio(newPos < Duration.zero ? Duration.zero : newPos),
@@ -236,11 +243,15 @@ class _Controls extends StatelessWidget {
                     : AppColors.textMuted.withValues(alpha: 0.5),
               ),
               onPressed: state.hasPreviousSurah
-                  ? () => context.read<PlayerBloc>().add(PreviousSurah())
+                  ? () {
+                      Haptics.select();
+                      context.read<PlayerBloc>().add(PreviousSurah());
+                    }
                   : null,
             ),
-            GestureDetector(
+            _PressableScale(
               onTap: () {
+                Haptics.tap();
                 if (state.status == PlayerStatus.playing) {
                   context.read<PlayerBloc>().add(PauseAudio());
                 } else if (state.status == PlayerStatus.paused ||
@@ -275,7 +286,10 @@ class _Controls extends StatelessWidget {
                     : AppColors.textMuted.withValues(alpha: 0.5),
               ),
               onPressed: state.hasNextSurah
-                  ? () => context.read<PlayerBloc>().add(NextSurah())
+                  ? () {
+                      Haptics.select();
+                      context.read<PlayerBloc>().add(NextSurah());
+                    }
                   : null,
             ),
             IconButton(
@@ -285,6 +299,7 @@ class _Controls extends StatelessWidget {
                 color: AppColors.textSecondary,
               ),
               onPressed: () {
+                Haptics.select();
                 final newPos = state.position + const Duration(seconds: 10);
                 context.read<PlayerBloc>().add(
                   SeekAudio(newPos > state.duration ? state.duration : newPos),
@@ -548,4 +563,42 @@ class _ArtworkPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ArtworkPainter oldDelegate) =>
       oldDelegate.progress != progress || oldDelegate.rotation != rotation;
+}
+
+/// Dips its child while held. Used for the play button, which is the most
+/// tapped control in the app and previously gave no feedback at all.
+class _PressableScale extends StatefulWidget {
+  final Widget child;
+  final VoidCallback onTap;
+
+  const _PressableScale({required this.child, required this.onTap});
+
+  @override
+  State<_PressableScale> createState() => _PressableScaleState();
+}
+
+class _PressableScaleState extends State<_PressableScale> {
+  bool _held = false;
+
+  void _setHeld(bool value) {
+    if (_held != value) setState(() => _held = value);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final dipped = _held && !MediaQuery.disableAnimationsOf(context);
+
+    return GestureDetector(
+      onTap: widget.onTap,
+      onTapDown: (_) => _setHeld(true),
+      onTapUp: (_) => _setHeld(false),
+      onTapCancel: () => _setHeld(false),
+      child: AnimatedScale(
+        scale: dipped ? 0.92 : 1,
+        duration: const Duration(milliseconds: 110),
+        curve: Curves.easeOut,
+        child: widget.child,
+      ),
+    );
+  }
 }

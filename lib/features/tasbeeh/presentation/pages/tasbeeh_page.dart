@@ -1,10 +1,10 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/themes/app_themes.dart';
+import 'package:quran_audio/core/utils/haptics.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/features/tasbeeh/presentation/bloc/tasbeeh_bloc.dart';
@@ -28,9 +28,9 @@ class _TasbeehPageState extends State<TasbeehPage> {
     final target = state.current?.target ?? 33;
     final isRoundComplete = (state.count + 1) % target == 0;
     if (isRoundComplete) {
-      HapticFeedback.heavyImpact();
+      Haptics.success();
     } else {
-      HapticFeedback.selectionClick();
+      Haptics.select();
     }
     context.read<TasbeehBloc>().add(TasbeehIncremented());
   }
@@ -176,14 +176,30 @@ class _BeadCounter extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    '${state.count}',
-                    style: const TextStyle(
-                      fontSize: 64,
-                      height: 1,
-                      fontWeight: FontWeight.w300,
-                      letterSpacing: -2,
-                      fontFeatures: [FontFeature.tabularFigures()],
+                  // the tally rolls over rather than snapping, so a fast
+                  // series of taps still reads as counting
+                  AnimatedSwitcher(
+                    duration: const Duration(milliseconds: 180),
+                    transitionBuilder: (child, animation) => FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween(
+                          begin: const Offset(0, 0.25),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    ),
+                    child: Text(
+                      '${state.count}',
+                      key: ValueKey(state.count),
+                      style: const TextStyle(
+                        fontSize: 64,
+                        height: 1,
+                        fontWeight: FontWeight.w300,
+                        letterSpacing: -2,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
                     ),
                   ),
                   const SizedBox(height: 6),

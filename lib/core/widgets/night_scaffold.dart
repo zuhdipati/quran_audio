@@ -60,7 +60,7 @@ class NightScaffold extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           const Positioned.fill(child: NightSkyBackground()),
-          SafeArea(child: body),
+          SafeArea(bottom: false, child: body),
         ],
       ),
     );
