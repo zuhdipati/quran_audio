@@ -60,9 +60,11 @@ class _SurahPageViewState extends State<SurahPageView> {
   }
 
   // prefers the fully loaded edition (with photo) over the stored one
-  EditionEntity? _resolveEdition(BuildContext context, EditionEntity? edition) {
+  EditionEntity? _resolveEdition(
+    EditionState editionState,
+    EditionEntity? edition,
+  ) {
     if (edition == null) return null;
-    final editionState = context.watch<EditionBloc>().state;
     if (editionState is EditionLoaded) {
       for (final loaded in editionState.allEditions) {
         if (loaded.identifier == edition.identifier) return loaded;
@@ -112,7 +114,7 @@ class _SurahPageViewState extends State<SurahPageView> {
             child: BlocBuilder<SurahListBloc, SurahListState>(
               builder: (context, state) {
                 final edition = _resolveEdition(
-                  context,
+                  context.watch<EditionBloc>().state,
                   _currentEdition(state),
                 );
                 return _QoriSelector(
@@ -170,7 +172,7 @@ class _SurahPageViewState extends State<SurahPageView> {
                                 'editionIdentifier':
                                     state.currentEdition.identifier,
                                 'edition': _resolveEdition(
-                                  context,
+                                  context.read<EditionBloc>().state,
                                   state.currentEdition,
                                 ),
                                 'surahList': state.allSurahs,
