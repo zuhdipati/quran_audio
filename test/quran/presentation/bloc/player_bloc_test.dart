@@ -10,6 +10,7 @@ import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 import '../../helpers/test_helper.dart';
 
 class FakeUri extends Fake implements Uri {}
+
 class FakeAudioSource extends Fake implements ja.AudioSource {}
 
 void main() {
@@ -24,7 +25,7 @@ void main() {
     revelationType: 'Meccan',
     numberOfAyahs: 7,
   );
-  
+
   const tSurah2 = SurahEntity(
     number: 2,
     name: 'Al-Baqarah',
@@ -47,11 +48,19 @@ void main() {
     mockAudioPlayer = MockAudioPlayer();
 
     // setup stream stubs since bloc listens to them in constructor
-    when(() => mockAudioPlayer.positionStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockAudioPlayer.durationStream).thenAnswer((_) => const Stream.empty());
-    when(() => mockAudioPlayer.playerStateStream).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAudioPlayer.positionStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAudioPlayer.durationStream,
+    ).thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAudioPlayer.playerStateStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockAudioPlayer.dispose()).thenAnswer((_) async {});
-    when(() => mockAudioPlayer.setAudioSource(any())).thenAnswer((_) async => null);
+    when(
+      () => mockAudioPlayer.setAudioSource(any()),
+    ).thenAnswer((_) async => null);
     when(() => mockAudioPlayer.play()).thenAnswer((_) async {});
     when(() => mockAudioPlayer.pause()).thenAnswer((_) async {});
     when(() => mockAudioPlayer.stop()).thenAnswer((_) async {});
@@ -68,6 +77,17 @@ void main() {
     expect(playerBloc.state.status, equals(PlayerStatus.initial));
   });
 
+  blocTest<PlayerBloc, PlayerState>(
+    'should clamp and apply recitation volume when SetQuranVolume is added',
+    build: () {
+      when(() => mockAudioPlayer.setVolume(any())).thenAnswer((_) async {});
+      return playerBloc;
+    },
+    act: (bloc) => bloc.add(const SetQuranVolume(1.4)),
+    expect: () => [const PlayerState(volume: 1.0)],
+    verify: (_) => verify(() => mockAudioPlayer.setVolume(1.0)).called(1),
+  );
+
   test('initial state should be correct with default audio player', () {
     final bloc = PlayerBloc();
     expect(bloc.state.status, equals(PlayerStatus.initial));
@@ -78,15 +98,17 @@ void main() {
     'should update position when stream emits',
     build: () {
       final mock = MockAudioPlayer();
-      when(() => mock.positionStream).thenAnswer((_) => Stream.value(const Duration(seconds: 1)));
+      when(
+        () => mock.positionStream,
+      ).thenAnswer((_) => Stream.value(const Duration(seconds: 1)));
       when(() => mock.durationStream).thenAnswer((_) => const Stream.empty());
-      when(() => mock.playerStateStream).thenAnswer((_) => const Stream.empty());
+      when(
+        () => mock.playerStateStream,
+      ).thenAnswer((_) => const Stream.empty());
       when(() => mock.dispose()).thenAnswer((_) async {});
       return PlayerBloc(audioPlayer: mock);
     },
-    expect: () => [
-      const PlayerState(position: Duration(seconds: 1)),
-    ],
+    expect: () => [const PlayerState(position: Duration(seconds: 1))],
   );
 
   blocTest<PlayerBloc, PlayerState>(
@@ -94,14 +116,16 @@ void main() {
     build: () {
       final mock = MockAudioPlayer();
       when(() => mock.positionStream).thenAnswer((_) => const Stream.empty());
-      when(() => mock.durationStream).thenAnswer((_) => Stream.value(const Duration(seconds: 2)));
-      when(() => mock.playerStateStream).thenAnswer((_) => const Stream.empty());
+      when(
+        () => mock.durationStream,
+      ).thenAnswer((_) => Stream.value(const Duration(seconds: 2)));
+      when(
+        () => mock.playerStateStream,
+      ).thenAnswer((_) => const Stream.empty());
       when(() => mock.dispose()).thenAnswer((_) async {});
       return PlayerBloc(audioPlayer: mock);
     },
-    expect: () => [
-      const PlayerState(duration: Duration(seconds: 2)),
-    ],
+    expect: () => [const PlayerState(duration: Duration(seconds: 2))],
   );
 
   blocTest<PlayerBloc, PlayerState>(
@@ -111,19 +135,30 @@ void main() {
       when(() => mock.positionStream).thenAnswer((_) => const Stream.empty());
       when(() => mock.durationStream).thenAnswer((_) => const Stream.empty());
       when(() => mock.playerStateStream).thenAnswer(
-          (_) => Stream.value(ja.PlayerState(false, ja.ProcessingState.completed)));
+        (_) =>
+            Stream.value(ja.PlayerState(false, ja.ProcessingState.completed)),
+      );
       when(() => mock.dispose()).thenAnswer((_) async {});
       return PlayerBloc(audioPlayer: mock);
     },
     expect: () => [
-      const PlayerState(status: PlayerStatus.completed, position: Duration.zero),
+      const PlayerState(
+        status: PlayerStatus.completed,
+        position: Duration.zero,
+      ),
     ],
   );
 
   blocTest<PlayerBloc, PlayerState>(
     'should emit [loading, paused, playing] when LoadSurah is added successfully',
     build: () => playerBloc,
-    act: (bloc) => bloc.add(const LoadSurah(tSurah1, editionIdentifier: tEdition, surahList: tSurahList)),
+    act: (bloc) => bloc.add(
+      const LoadSurah(
+        tSurah1,
+        editionIdentifier: tEdition,
+        surahList: tSurahList,
+      ),
+    ),
     expect: () => [
       const PlayerState(
         status: PlayerStatus.loading,
@@ -153,10 +188,18 @@ void main() {
   blocTest<PlayerBloc, PlayerState>(
     'should emit [loading, error] when LoadSurah fails',
     build: () {
-      when(() => mockAudioPlayer.setAudioSource(any())).thenThrow(Exception('Failed'));
+      when(
+        () => mockAudioPlayer.setAudioSource(any()),
+      ).thenThrow(Exception('Failed'));
       return playerBloc;
     },
-    act: (bloc) => bloc.add(const LoadSurah(tSurah1, editionIdentifier: tEdition, surahList: tSurahList)),
+    act: (bloc) => bloc.add(
+      const LoadSurah(
+        tSurah1,
+        editionIdentifier: tEdition,
+        surahList: tSurahList,
+      ),
+    ),
     expect: () => [
       const PlayerState(
         status: PlayerStatus.loading,
@@ -179,7 +222,11 @@ void main() {
     build: () => playerBloc,
     act: (bloc) => bloc.add(PlayAudio()),
     expect: () => [
-      isA<PlayerState>().having((s) => s.status, 'status', PlayerStatus.playing),
+      isA<PlayerState>().having(
+        (s) => s.status,
+        'status',
+        PlayerStatus.playing,
+      ),
     ],
   );
 
@@ -197,7 +244,11 @@ void main() {
     build: () => playerBloc,
     act: (bloc) => bloc.add(ResumeAudio()),
     expect: () => [
-      isA<PlayerState>().having((s) => s.status, 'status', PlayerStatus.playing),
+      isA<PlayerState>().having(
+        (s) => s.status,
+        'status',
+        PlayerStatus.playing,
+      ),
     ],
   );
 
@@ -276,18 +327,14 @@ void main() {
     'should update position when UpdatePosition is added',
     build: () => playerBloc,
     act: (bloc) => bloc.add(const UpdatePosition(Duration(seconds: 5))),
-    expect: () => [
-      const PlayerState(position: Duration(seconds: 5)),
-    ],
+    expect: () => [const PlayerState(position: Duration(seconds: 5))],
   );
 
   blocTest<PlayerBloc, PlayerState>(
     'should update duration when UpdateDuration is added',
     build: () => playerBloc,
     act: (bloc) => bloc.add(const UpdateDuration(Duration(minutes: 1))),
-    expect: () => [
-      const PlayerState(duration: Duration(minutes: 1)),
-    ],
+    expect: () => [const PlayerState(duration: Duration(minutes: 1))],
   );
 
   blocTest<PlayerBloc, PlayerState>(
@@ -355,11 +402,9 @@ void main() {
     build: () => playerBloc,
     seed: () => const PlayerState(status: PlayerStatus.playing),
     act: (bloc) => bloc.add(StopAudio()),
-    expect: () => [
-      const PlayerState(status: PlayerStatus.initial),
-    ],
+    expect: () => [const PlayerState(status: PlayerStatus.initial)],
     verify: (bloc) {
       verify(() => mockAudioPlayer.stop()).called(1);
-      },
+    },
   );
 }

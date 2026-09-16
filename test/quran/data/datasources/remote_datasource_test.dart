@@ -25,91 +25,176 @@ void main() {
             "type": "directory",
             "name": "128",
             "contents": [
-              {
-                "type": "directory",
-                "name": "ar.alafasy",
-              }
-            ]
-          }
-        ]
-      }
+              {"type": "directory", "name": "ar.alafasy"},
+            ],
+          },
+        ],
+      },
     ];
 
-    test('should return list of EditionModel when response code is 200', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: tResponseData,
-                statusCode: 200,
-                requestOptions: RequestOptions(path: urlGetCdnInfo),
-              ));
+    final tNamesData = {
+      'code': 200,
+      'data': [
+        {
+          'identifier': 'ar.alafasy',
+          'language': 'ar',
+          'name': 'مشاري العفاسي',
+          'englishName': 'Mishary Rashid Alafasy',
+          'format': 'audio',
+          'type': 'versebyverse',
+          'direction': null,
+        },
+        {
+          'identifier': 'ar.notoncdn',
+          'language': 'ar',
+          'name': 'x',
+          'englishName': 'Not On Cdn',
+          'format': 'audio',
+          'type': 'versebyverse',
+          'direction': null,
+        },
+      ],
+    };
 
-      final result = await dataSource.getAllEdition();
-      expect(result.length, equals(1));
-      expect(result.first.identifier, equals('ar.alafasy'));
-    });
+    test(
+      'should return list of EditionModel when response code is 200',
+      () async {
+        when(
+          () => mockDio.get(urlGetCdnInfo, options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: tResponseData,
+            statusCode: 200,
+            requestOptions: RequestOptions(path: urlGetCdnInfo),
+          ),
+        );
+        when(
+          () =>
+              mockDio.get(urlGetAudioEditions, options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: tNamesData,
+            statusCode: 200,
+            requestOptions: RequestOptions(path: urlGetAudioEditions),
+          ),
+        );
 
-    test('should throw GeneralException when no audio editions found', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: [
-                  {
-                    "type": "directory",
-                    "name": "/mnt/cdn/islamic-network-cdn/quran/audio-surah",
-                    "contents": []
-                  }
-                ],
-                statusCode: 200,
-                requestOptions: RequestOptions(path: urlGetCdnInfo),
-              ));
+        final result = await dataSource.getAllEdition();
+        expect(result.length, equals(1));
+        expect(result.first.identifier, equals('ar.alafasy'));
+        expect(result.first.englishName, equals('Mishary Rashid Alafasy'));
+        expect(result.first.name, equals('مشاري العفاسي'));
+      },
+    );
 
-      expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
-    });
+    test(
+      'should fall back to identifier names when the names request fails',
+      () async {
+        when(
+          () => mockDio.get(urlGetCdnInfo, options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: tResponseData,
+            statusCode: 200,
+            requestOptions: RequestOptions(path: urlGetCdnInfo),
+          ),
+        );
+        when(
+          () =>
+              mockDio.get(urlGetAudioEditions, options: any(named: 'options')),
+        ).thenThrow(
+          DioException(
+            requestOptions: RequestOptions(path: urlGetAudioEditions),
+          ),
+        );
 
-    test('should throw GeneralException when response code is not 200', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: 'error',
-                statusCode: 500,
-                requestOptions: RequestOptions(path: urlGetCdnInfo),
-              ));
+        final result = await dataSource.getAllEdition();
+        expect(result.single.identifier, equals('ar.alafasy'));
+        expect(result.single.englishName, equals('Alafasy'));
+      },
+    );
 
-      expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
-    });
+    test(
+      'should throw GeneralException when no audio editions found',
+      () async {
+        when(
+          () => mockDio.get(any(), options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: [
+              {
+                "type": "directory",
+                "name": "/mnt/cdn/islamic-network-cdn/quran/audio-surah",
+                "contents": [],
+              },
+            ],
+            statusCode: 200,
+            requestOptions: RequestOptions(path: urlGetCdnInfo),
+          ),
+        );
+
+        expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
+      },
+    );
+
+    test(
+      'should throw GeneralException when response code is not 200',
+      () async {
+        when(
+          () => mockDio.get(any(), options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: 'error',
+            statusCode: 500,
+            requestOptions: RequestOptions(path: urlGetCdnInfo),
+          ),
+        );
+
+        expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
+      },
+    );
 
     test('should throw GeneralException on connectionTimeout', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetCdnInfo),
-        type: DioExceptionType.connectionTimeout,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: urlGetCdnInfo),
+          type: DioExceptionType.connectionTimeout,
+        ),
+      );
 
       expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
     });
 
     test('should throw GeneralException on badResponse', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetCdnInfo),
-        response: Response(statusCode: 404, requestOptions: RequestOptions(path: urlGetCdnInfo)),
-        type: DioExceptionType.badResponse,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: urlGetCdnInfo),
+          response: Response(
+            statusCode: 404,
+            requestOptions: RequestOptions(path: urlGetCdnInfo),
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
 
       expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
     });
 
     test('should throw GeneralException on other DioException', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetCdnInfo),
-        type: DioExceptionType.cancel,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: urlGetCdnInfo),
+          type: DioExceptionType.cancel,
+        ),
+      );
 
       expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
     });
 
     test('should throw GeneralException on non-DioException error', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(Exception('Unknown error'));
+      when(
+        () => mockDio.get(any(), options: any(named: 'options')),
+      ).thenThrow(Exception('Unknown error'));
 
       expect(() => dataSource.getAllEdition(), throwsA(isA<Exception>()));
     });
@@ -126,69 +211,86 @@ void main() {
             "englishName": "Al-Faatiha",
             "englishNameTranslation": "The Opening",
             "revelationType": "Meccan",
-            "numberOfAyahs": 7
-          }
-        ]
-      }
+            "numberOfAyahs": 7,
+          },
+        ],
+      },
     };
 
     test('should return list of SurahModel when response is 200', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: tResponseData,
-                statusCode: 200,
-                requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
-              ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenAnswer(
+        (_) async => Response(
+          data: tResponseData,
+          statusCode: 200,
+          requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
+        ),
+      );
 
       final result = await dataSource.getAllSurah(tEdition);
       expect(result.length, equals(1));
     });
 
-    test('should throw GeneralException when response code is not 200', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: 'error',
-                statusCode: 500,
-                requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
-              ));
+    test(
+      'should throw GeneralException when response code is not 200',
+      () async {
+        when(
+          () => mockDio.get(any(), options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: 'error',
+            statusCode: 500,
+            requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
+          ),
+        );
 
-      expect(() => dataSource.getAllSurah(tEdition), throwsA(isA<Exception>()));
-    });
+        expect(
+          () => dataSource.getAllSurah(tEdition),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
 
     test('should throw GeneralException on connectionTimeout', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
-        type: DioExceptionType.connectionTimeout,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
+          type: DioExceptionType.connectionTimeout,
+        ),
+      );
 
       expect(() => dataSource.getAllSurah(tEdition), throwsA(isA<Exception>()));
     });
 
     test('should throw GeneralException on badResponse', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
-        response: Response(statusCode: 404, requestOptions: RequestOptions(path: urlGetAllSurah(tEdition))),
-        type: DioExceptionType.badResponse,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
+          response: Response(
+            statusCode: 404,
+            requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
 
       expect(() => dataSource.getAllSurah(tEdition), throwsA(isA<Exception>()));
     });
 
     test('should throw GeneralException on other DioException', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
-        type: DioExceptionType.cancel,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(path: urlGetAllSurah(tEdition)),
+          type: DioExceptionType.cancel,
+        ),
+      );
 
       expect(() => dataSource.getAllSurah(tEdition), throwsA(isA<Exception>()));
     });
 
     test('should throw GeneralException on non-DioException error', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(Exception('Unknown error'));
+      when(
+        () => mockDio.get(any(), options: any(named: 'options')),
+      ).thenThrow(Exception('Unknown error'));
 
       expect(() => dataSource.getAllSurah(tEdition), throwsA(isA<Exception>()));
     });
@@ -204,69 +306,110 @@ void main() {
         "englishName": "Al-Faatiha",
         "englishNameTranslation": "The Opening",
         "revelationType": "Meccan",
-        "numberOfAyahs": 7
-      }
+        "numberOfAyahs": 7,
+      },
     };
 
     test('should return SurahModel when response is 200', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: tResponseData,
-                statusCode: 200,
-                requestOptions: RequestOptions(path: urlGetSurah(tSurahNumber.toString(), tEdition)),
-              ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenAnswer(
+        (_) async => Response(
+          data: tResponseData,
+          statusCode: 200,
+          requestOptions: RequestOptions(
+            path: urlGetSurah(tSurahNumber.toString(), tEdition),
+          ),
+        ),
+      );
 
       final result = await dataSource.getSurah(tSurahNumber, tEdition);
       expect(result.number, equals(1));
     });
 
-    test('should throw GeneralException when response code is not 200', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenAnswer((_) async => Response(
-                data: 'error',
-                statusCode: 500,
-                requestOptions: RequestOptions(path: urlGetSurah(tSurahNumber.toString(), tEdition)),
-              ));
+    test(
+      'should throw GeneralException when response code is not 200',
+      () async {
+        when(
+          () => mockDio.get(any(), options: any(named: 'options')),
+        ).thenAnswer(
+          (_) async => Response(
+            data: 'error',
+            statusCode: 500,
+            requestOptions: RequestOptions(
+              path: urlGetSurah(tSurahNumber.toString(), tEdition),
+            ),
+          ),
+        );
 
-      expect(() => dataSource.getSurah(tSurahNumber, tEdition), throwsA(isA<Exception>()));
-    });
+        expect(
+          () => dataSource.getSurah(tSurahNumber, tEdition),
+          throwsA(isA<Exception>()),
+        );
+      },
+    );
 
     test('should throw GeneralException on connectionTimeout', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetSurah(tSurahNumber.toString(), tEdition)),
-        type: DioExceptionType.connectionTimeout,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(
+            path: urlGetSurah(tSurahNumber.toString(), tEdition),
+          ),
+          type: DioExceptionType.connectionTimeout,
+        ),
+      );
 
-      expect(() => dataSource.getSurah(tSurahNumber, tEdition), throwsA(isA<Exception>()));
+      expect(
+        () => dataSource.getSurah(tSurahNumber, tEdition),
+        throwsA(isA<Exception>()),
+      );
     });
 
     test('should throw GeneralException on badResponse', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetSurah(tSurahNumber.toString(), tEdition)),
-        response: Response(statusCode: 404, requestOptions: RequestOptions(path: urlGetSurah(tSurahNumber.toString(), tEdition))),
-        type: DioExceptionType.badResponse,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(
+            path: urlGetSurah(tSurahNumber.toString(), tEdition),
+          ),
+          response: Response(
+            statusCode: 404,
+            requestOptions: RequestOptions(
+              path: urlGetSurah(tSurahNumber.toString(), tEdition),
+            ),
+          ),
+          type: DioExceptionType.badResponse,
+        ),
+      );
 
-      expect(() => dataSource.getSurah(tSurahNumber, tEdition), throwsA(isA<Exception>()));
+      expect(
+        () => dataSource.getSurah(tSurahNumber, tEdition),
+        throwsA(isA<Exception>()),
+      );
     });
 
     test('should throw GeneralException on other DioException', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(DioException(
-        requestOptions: RequestOptions(path: urlGetSurah(tSurahNumber.toString(), tEdition)),
-        type: DioExceptionType.cancel,
-      ));
+      when(() => mockDio.get(any(), options: any(named: 'options'))).thenThrow(
+        DioException(
+          requestOptions: RequestOptions(
+            path: urlGetSurah(tSurahNumber.toString(), tEdition),
+          ),
+          type: DioExceptionType.cancel,
+        ),
+      );
 
-      expect(() => dataSource.getSurah(tSurahNumber, tEdition), throwsA(isA<Exception>()));
+      expect(
+        () => dataSource.getSurah(tSurahNumber, tEdition),
+        throwsA(isA<Exception>()),
+      );
     });
 
     test('should throw GeneralException on non-DioException error', () async {
-      when(() => mockDio.get(any(), options: any(named: 'options')))
-          .thenThrow(Exception('Unknown error'));
+      when(
+        () => mockDio.get(any(), options: any(named: 'options')),
+      ).thenThrow(Exception('Unknown error'));
 
-      expect(() => dataSource.getSurah(tSurahNumber, tEdition), throwsA(isA<Exception>()));
+      expect(
+        () => dataSource.getSurah(tSurahNumber, tEdition),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

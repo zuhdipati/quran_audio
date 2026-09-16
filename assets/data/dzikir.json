@@ -1,0 +1,67 @@
+[
+ {
+  "id": "tasbih",
+  "arabic": "سُبْحَانَ اللّٰهِ",
+  "latin": "Subhanallah",
+  "translation": "Maha Suci Allah",
+  "target": 33
+ },
+ {
+  "id": "tahmid",
+  "arabic": "اَلْحَمْدُ لِلّٰهِ",
+  "latin": "Alhamdulillah",
+  "translation": "Segala puji bagi Allah",
+  "target": 33
+ },
+ {
+  "id": "takbir",
+  "arabic": "اَللّٰهُ أَكْبَرُ",
+  "latin": "Allahu akbar",
+  "translation": "Allah Maha Besar",
+  "target": 33
+ },
+ {
+  "id": "tahlil",
+  "arabic": "لَا إِلٰهَ إِلَّا اللّٰهُ",
+  "latin": "La ilaha illallah",
+  "translation": "Tiada Tuhan selain Allah",
+  "target": 100
+ },
+ {
+  "id": "istighfar",
+  "arabic": "أَسْتَغْفِرُ اللّٰهَ",
+  "latin": "Astaghfirullah",
+  "translation": "Aku memohon ampun kepada Allah",
+  "target": 100
+ },
+ {
+  "id": "dzikir_204",
+  "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ",
+  "latin": "Subhaanallaahi wa bihamdih.",
+  "translation": "Maha Suci Allah, aku memujiNya.",
+  "target": 100,
+  "source": "HR. Al-Bukhari 7/168, Muslim 4/2071."
+ },
+ {
+  "id": "dzikir_206",
+  "arabic": "سُبْحَانَ اللَّهِ وَبِحَمْدِهِ، سُبْحَانَ اللَّهِ الْعَظِيْمِ",
+  "latin": "Subhaanallaahi wa bihamdih, subhaanallaahil 'azhiim.",
+  "translation": "Maha Suci Allah, aku memujiNya, Maha Suci Allah Yang Maha Agung.",
+  "target": 100,
+  "source": "HR. Al-Bukhari 7/168 dan Muslim 4/2072."
+ },
+ {
+  "id": "hauqalah",
+  "arabic": "لَا حَوْلَ وَلَا قُوَّةَ إِلَّا بِاللّٰهِ",
+  "latin": "La hawla wa la quwwata illa billah",
+  "translation": "Tiada daya dan kekuatan kecuali dengan pertolongan Allah",
+  "target": 33
+ },
+ {
+  "id": "shalawat",
+  "arabic": "اَللّٰهُمَّ صَلِّ عَلَى مُحَمَّدٍ",
+  "latin": "Allahumma shalli 'ala Muhammad",
+  "translation": "Ya Allah, limpahkanlah shalawat kepada Muhammad",
+  "target": 100
+ }
+]

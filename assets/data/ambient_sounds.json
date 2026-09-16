@@ -1,0 +1,82 @@
+[
+ {
+  "id": "rain",
+  "name": "Hujan",
+  "subtitle": "Rain",
+  "asset": "assets/sounds/rain.mp3",
+  "attribution": "ezwa · Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Rain_(1).ogg"
+ },
+ {
+  "id": "drizzle",
+  "name": "Gerimis",
+  "subtitle": "Drizzle",
+  "asset": "assets/sounds/drizzle.mp3",
+  "attribution": "Mijesty · CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Sound_of_light_rainfall.ogg"
+ },
+ {
+  "id": "thunderstorm",
+  "name": "Hujan Petir",
+  "subtitle": "Thunderstorm",
+  "asset": "assets/sounds/thunderstorm.mp3",
+  "attribution": "ezwa · Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Rain_and_thunder_(1).ogg"
+ },
+ {
+  "id": "rain_window",
+  "name": "Hujan di Jendela",
+  "subtitle": "Rain on Window",
+  "asset": "assets/sounds/rain_window.mp3",
+  "attribution": "cori · Public domain",
+  "source": "https://commons.wikimedia.org/wiki/File:Rain_against_the_window.ogg"
+ },
+ {
+  "id": "stream",
+  "name": "Air Mengalir",
+  "subtitle": "Stream",
+  "asset": "assets/sounds/stream.mp3",
+  "attribution": "jackthemurray · CC0",
+  "source": "https://commons.wikimedia.org/wiki/File:433589_jackthemurray_stream-river-water-up-close.wav"
+ },
+ {
+  "id": "waterfall",
+  "name": "Air Terjun",
+  "subtitle": "Waterfall",
+  "asset": "assets/sounds/waterfall.mp3",
+  "attribution": "Benzband · CC BY-SA 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Water_fall.ogg"
+ },
+ {
+  "id": "birds",
+  "name": "Kicau Burung",
+  "subtitle": "Birdsong",
+  "asset": "assets/sounds/birds.mp3",
+  "attribution": "Robert EA Harvey · CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Bourne_Woods_Birdsong_2020-04-27_0751.mp3"
+ },
+ {
+  "id": "ocean",
+  "name": "Ombak",
+  "subtitle": "Ocean Waves",
+  "asset": "assets/sounds/ocean.mp3",
+  "attribution": "Luftrum · CC BY 3.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Oceanwavescrushing.ogg"
+ },
+ {
+  "id": "wind",
+  "name": "Angin Hutan",
+  "subtitle": "Forest Wind",
+  "asset": "assets/sounds/wind.mp3",
+  "attribution": "W.carter · CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Wind_in_Swedish_pine_forest_at_25_mps.ogg"
+ },
+ {
+  "id": "night",
+  "name": "Suara Malam",
+  "subtitle": "Night Chorus",
+  "asset": "assets/sounds/night.mp3",
+  "attribution": "JogiAsad · CC BY-SA 4.0",
+  "source": "https://commons.wikimedia.org/wiki/File:Frogs_croak_calling_chorus_at_night.ogg"
+ }
+]

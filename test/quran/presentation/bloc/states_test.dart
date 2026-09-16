@@ -24,7 +24,7 @@ void main() {
   group('PlayerState', () {
     test('props should be correct', () {
       const state = PlayerState();
-      expect(state.props, [PlayerStatus.initial, null, '', [], Duration.zero, Duration.zero, '']);
+      expect(state.props, [PlayerStatus.initial, null, '', [], Duration.zero, Duration.zero, '', 1.0]);
     });
 
     test('copyWith should return updated state', () {

@@ -4,16 +4,17 @@ A beautiful, feature-rich Flutter application designed for listening to the Holy
 
 ## Key Features
 
-* **Complete Surah List**: Browse and search through all 114 Surahs of the Quran.
-* **Qori / Edition Selection**: Choose from a wide variety of Qoris. 
-* **Advanced Audio Player**:
-  * Play, Pause, and Resume capabilities.
-  * Skip to Next or Previous Surah seamlessly.
-  * Forward and Rewind by 10 seconds.
-  * Interactive progress bar with exact duration.
-  * Auto-play next Surah upon completion.
-* **Offline Protection**: Safely caches essential data (using Hive) and prevents attempting to stream audio when the device loses internet connection, providing graceful error handling via Toast notifications.
-* **Clean & Modern UI**: Built with a custom, aesthetically pleasing design system featuring responsive bottom sheets, customized app bars, and intuitive icons.
+* **Prayer times on the home screen**: Fajr, Dzuhr, Asr, Maghrib and Isha with a countdown to the next prayer, calculated offline from your location (Kemenag RI parameters, Fajr 20° / Isha 18°).
+* **Menu**: Quran, Hijri, Qibla, Tasbeeh, Calendar, Dua, Hadith and Salah, plus a **Daily Dua** with Arabic, transliteration and translation.
+* **Quran audio player**:
+  * Reciter list with clean names, Arabic names and photos.
+  * Play/pause, next/previous surah, ±10 seconds, seek, auto-play next surah.
+  * **Nature sound mixer**: rain, drizzle, thunderstorm, stream, waterfall, birdsong, ocean, wind and night sounds that play together with the recitation, each with its own volume.
+* **Calendar**: month view with the prayer times for every day and the Hijri date.
+* **Hijri**: Hijri month view and upcoming Islamic days.
+* **Qibla**: compass pointing towards the Kaaba.
+* **Tasbeeh**: counter with common dzikir, saved between sessions.
+* **Dua** (226 duas), **Hadith** (Arbain An-Nawawi, 42 hadith) and **Salah** (niat and readings), all bundled as JSON in `assets/data` and available offline.
 
 ## Technology Stack 
 
@@ -32,8 +33,17 @@ This project strictly adheres to **Clean Architecture** principles and uses **BL
 * **Testing (`flutter_test`, `mocktail`, `bloc_test`)**: Ensuring high reliability with nearly 100% test coverage across Unit and Widget tests.
 
 ### APIs & Data Sources
-1. **[Al Quran Cloud API](https://alquran.cloud/api)**: Used to fetch the metadata and list of Surahs (`/quran/{edition}`).
-2. **[Islamic Network CDN](https://cdn.islamic.network/)**: Used as the absolute source of truth for available Qoris (`/quran/info/by-surah/info.json`) and for streaming the actual `.mp3` audio files. This replaces legacy endpoints to guarantee 0% 404 errors during playback.
+1. **[Al Quran Cloud API](https://alquran.cloud/api)**: surah metadata (`/quran/{edition}`) and reciter names (`/edition?format=audio`).
+2. **[Islamic Network CDN](https://cdn.islamic.network/)**: list of available reciters and the surah `.mp3` streams.
+3. **Bundled JSON (`assets/data`)**:
+   * Duas from [equran.id](https://equran.id/doa) (sourced from Hisnul Muslim, with references).
+   * Hadith Arbain An-Nawawi from [api.myquran.com](https://api.myquran.com).
+   * Salah readings and niat; Al-Fatihah uses the Uthmani text from Al Quran Cloud.
+   * Reciter photos from Wikimedia Commons via Wikipedia.
+4. **Prayer times, Qibla and Hijri dates** are calculated on device with [adhan](https://pub.dev/packages/adhan) and [hijri](https://pub.dev/packages/hijri).
+
+### Nature Sound Credits
+Recordings in `assets/sounds` come from Wikimedia Commons: Rain and Rain & Thunder by ezwa (public domain), Rain on Window by cori (public domain), Light Rainfall by Mijesty (CC BY-SA 4.0), Stream by jackthemurray (CC0), Waterfall by Benzband (CC BY-SA 3.0), Birdsong by Robert EA Harvey (CC BY-SA 4.0), Ocean Waves by Luftrum (CC BY 3.0), Forest Wind by W.carter (CC BY-SA 4.0), Night Chorus by JogiAsad (CC BY-SA 4.0). Source links are listed in `assets/data/ambient_sounds.json`.
 
 <img width="390" height="844" alt="Simulator Screenshot - iPhone 16e - 2026-05-31 at 03 37 00" src="https://github.com/user-attachments/assets/ae115542-5a68-4314-9abb-1b92c919c14b" />
 <img width="390" height="844" alt="Simulator Screenshot - iPhone 16e - 2026-05-31 at 03 37 12" src="https://github.com/user-attachments/assets/9710ef7c-e64d-409d-94e1-5e6726edf112" />

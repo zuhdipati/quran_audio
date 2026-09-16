@@ -1,5 +1,8 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:quran_audio/core/utils/arabic_number_utils.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 
@@ -17,19 +20,19 @@ class SurahTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(
           children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: const BoxDecoration(
-                color: AppColors.primary,
-                shape: BoxShape.circle,
-              ),
-              child: Center(
-                child: Text(
-                  ArabicNumberUtils.convert(surah.number),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
+            SizedBox.square(
+              dimension: 42,
+              child: CustomPaint(
+                painter: const _EightPointStarPainter(),
+                child: Center(
+                  child: Text(
+                    ArabicNumberUtils.convert(surah.number),
+                    style: const TextStyle(
+                      fontFamily: 'Amiri',
+                      fontSize: 15,
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
               ),
@@ -44,26 +47,30 @@ class SurahTile extends StatelessWidget {
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
-                      color: AppColors.black,
+                      color: AppColors.textPrimary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 3),
                   Text(
-                    '${surah.revelationType} • ${ArabicNumberUtils.convert(surah.numberOfAyahs)} Ayahs',
+                    '${surah.englishNameTranslation} · ${surah.numberOfAyahs} ayahs',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 12,
-                      color: AppColors.textGrey,
+                      color: AppColors.textMuted,
                     ),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 8),
             Text(
               surah.name,
-              style: const TextStyle(
+              textDirection: TextDirection.rtl,
+              style: AppTheme.arabic(
                 fontSize: 20,
-                color: AppColors.primary,
-                fontWeight: FontWeight.bold,
+                height: 1.4,
+                color: AppColors.textSecondary,
               ),
             ),
           ],
@@ -71,4 +78,40 @@ class SurahTile extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Rub el hizb outline used as the surah number badge.
+class _EightPointStarPainter extends CustomPainter {
+  const _EightPointStarPainter();
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final half = size.width * 0.34;
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.2
+      ..color = AppColors.primary.withValues(alpha: 0.6);
+
+    for (final rotation in [0.0, math.pi / 4]) {
+      canvas.save();
+      canvas.translate(center.dx, center.dy);
+      canvas.rotate(rotation);
+      canvas.drawRRect(
+        RRect.fromRectAndRadius(
+          Rect.fromCenter(
+            center: Offset.zero,
+            width: half * 2,
+            height: half * 2,
+          ),
+          const Radius.circular(2),
+        ),
+        paint,
+      );
+      canvas.restore();
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

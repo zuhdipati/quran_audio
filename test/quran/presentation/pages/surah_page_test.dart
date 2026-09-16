@@ -11,11 +11,14 @@ import 'package:quran_audio/features/quran/presentation/pages/surah_page.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/edition_bottom_sheet.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/surah_tile.dart';
 
-class MockEditionBloc extends MockBloc<EditionEvent, EditionState> implements EditionBloc {}
-class MockSurahListBloc extends MockBloc<SurahListEvent, SurahListState> implements SurahListBloc {}
+class MockEditionBloc extends MockBloc<EditionEvent, EditionState>
+    implements EditionBloc {}
 
+class MockSurahListBloc extends MockBloc<SurahListEvent, SurahListState>
+    implements SurahListBloc {}
 
 class FakeSurahListEvent extends Fake implements SurahListEvent {}
+
 class FakeSurahListState extends Fake implements SurahListState {}
 
 void main() {
@@ -32,6 +35,7 @@ void main() {
   setUp(() {
     mockEditionBloc = MockEditionBloc();
     mockSurahListBloc = MockSurahListBloc();
+    when(() => mockEditionBloc.state).thenReturn(EditionInitial());
   });
 
   const tEdition = EditionEntity(
@@ -56,24 +60,33 @@ void main() {
         BlocProvider<EditionBloc>.value(value: mockEditionBloc),
         BlocProvider<SurahListBloc>.value(value: mockSurahListBloc),
       ],
-      child: MaterialApp(
-        home: Scaffold(body: body),
-      ),
+      child: MaterialApp(home: Scaffold(body: body)),
     );
   }
 
   group('Surah Page & Data', () {
-    testWidgets('should show loading indicator when fetching surahs (get data)', (WidgetTester tester) async {
-      when(() => mockSurahListBloc.state).thenReturn(const SurahListLoading(currentEdition: tEdition));
-      
-      await tester.pumpWidget(makeTestableWidget(const SurahPage()));
+    testWidgets(
+      'should show loading indicator when fetching surahs (get data)',
+      (WidgetTester tester) async {
+        when(
+          () => mockSurahListBloc.state,
+        ).thenReturn(const SurahListLoading(currentEdition: tEdition));
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
-    });
+        await tester.pumpWidget(makeTestableWidget(const SurahPage()));
 
-    testWidgets('should show list of surahs when data is loaded successfully', (WidgetTester tester) async {
+        expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      },
+    );
+
+    testWidgets('should show list of surahs when data is loaded successfully', (
+      WidgetTester tester,
+    ) async {
       when(() => mockSurahListBloc.state).thenReturn(
-        const SurahListLoaded(allSurahs: [tSurah], filteredSurahs: [tSurah], currentEdition: tEdition),
+        const SurahListLoaded(
+          allSurahs: [tSurah],
+          filteredSurahs: [tSurah],
+          currentEdition: tEdition,
+        ),
       );
 
       await tester.pumpWidget(makeTestableWidget(const SurahPage()));
@@ -82,53 +95,85 @@ void main() {
       expect(find.text('Al-Fatihah'), findsWidgets);
     });
 
-    testWidgets('should trigger SearchSurahs event when typing in search field', (WidgetTester tester) async {
-      when(() => mockSurahListBloc.state).thenReturn(
-        const SurahListLoaded(allSurahs: [tSurah], filteredSurahs: [tSurah], currentEdition: tEdition),
-      );
+    testWidgets(
+      'should trigger SearchSurahs event when typing in search field',
+      (WidgetTester tester) async {
+        when(() => mockSurahListBloc.state).thenReturn(
+          const SurahListLoaded(
+            allSurahs: [tSurah],
+            filteredSurahs: [tSurah],
+            currentEdition: tEdition,
+          ),
+        );
 
-      await tester.pumpWidget(makeTestableWidget(const SurahPage()));
+        await tester.pumpWidget(makeTestableWidget(const SurahPage()));
 
-      final searchField = find.byType(TextField).first;
-      await tester.enterText(searchField, 'Baqarah');
-      await tester.pump();
+        final searchField = find.byType(TextField).first;
+        await tester.enterText(searchField, 'Baqarah');
+        await tester.pump();
 
-      verify(() => mockSurahListBloc.add(const SearchSurahs('Baqarah'))).called(1);
-    });
+        verify(
+          () => mockSurahListBloc.add(const SearchSurahs('Baqarah')),
+        ).called(1);
+      },
+    );
   });
 
   group('Qori / Edition Data in Bottom Sheet', () {
-    testWidgets('should show loading indicator when fetching qori (get qori)', (WidgetTester tester) async {
+    testWidgets('should show loading indicator when fetching qori (get qori)', (
+      WidgetTester tester,
+    ) async {
       when(() => mockEditionBloc.state).thenReturn(EditionLoading());
-      
-      await tester.pumpWidget(makeTestableWidget(const EditionBottomSheet(currentEdition: tEdition)));
+
+      await tester.pumpWidget(
+        makeTestableWidget(const EditionBottomSheet(currentEdition: tEdition)),
+      );
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('should show list of qori when data is loaded successfully', (WidgetTester tester) async {
+    testWidgets('should show list of qori when data is loaded successfully', (
+      WidgetTester tester,
+    ) async {
       when(() => mockEditionBloc.state).thenReturn(
-        const EditionLoaded(allEditions: [tEdition], filteredEditions: [tEdition]),
+        const EditionLoaded(
+          allEditions: [tEdition],
+          filteredEditions: [tEdition],
+        ),
       );
 
-      await tester.pumpWidget(makeTestableWidget(const EditionBottomSheet(currentEdition: tEdition)));
+      await tester.pumpWidget(
+        makeTestableWidget(const EditionBottomSheet(currentEdition: tEdition)),
+      );
 
       expect(find.text('Mishary Rashid Alafasy'), findsOneWidget);
       expect(find.byType(ListTile), findsOneWidget);
     });
 
-    testWidgets('should trigger SearchEditions event when typing in qori search field', (WidgetTester tester) async {
-      when(() => mockEditionBloc.state).thenReturn(
-        const EditionLoaded(allEditions: [tEdition], filteredEditions: [tEdition]),
-      );
+    testWidgets(
+      'should trigger SearchEditions event when typing in qori search field',
+      (WidgetTester tester) async {
+        when(() => mockEditionBloc.state).thenReturn(
+          const EditionLoaded(
+            allEditions: [tEdition],
+            filteredEditions: [tEdition],
+          ),
+        );
 
-      await tester.pumpWidget(makeTestableWidget(const EditionBottomSheet(currentEdition: tEdition)));
+        await tester.pumpWidget(
+          makeTestableWidget(
+            const EditionBottomSheet(currentEdition: tEdition),
+          ),
+        );
 
-      final searchField = find.byType(TextField).first;
-      await tester.enterText(searchField, 'Sudais');
-      await tester.pump();
+        final searchField = find.byType(TextField).first;
+        await tester.enterText(searchField, 'Sudais');
+        await tester.pump();
 
-      verify(() => mockEditionBloc.add(const SearchEditions('Sudais'))).called(1);
-    });
+        verify(
+          () => mockEditionBloc.add(const SearchEditions('Sudais')),
+        ).called(1);
+      },
+    );
   });
 }

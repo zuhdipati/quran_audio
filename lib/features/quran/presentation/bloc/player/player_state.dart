@@ -11,6 +11,7 @@ class PlayerState extends Equatable {
   final Duration position;
   final Duration duration;
   final String errorMessage;
+  final double volume;
 
   const PlayerState({
     this.status = PlayerStatus.initial,
@@ -20,6 +21,7 @@ class PlayerState extends Equatable {
     this.position = Duration.zero,
     this.duration = Duration.zero,
     this.errorMessage = '',
+    this.volume = 1.0,
   });
 
   bool get hasNextSurah {
@@ -46,6 +48,7 @@ class PlayerState extends Equatable {
     Duration? position,
     Duration? duration,
     String? errorMessage,
+    double? volume,
   }) {
     return PlayerState(
       status: status ?? this.status,
@@ -55,6 +58,7 @@ class PlayerState extends Equatable {
       position: position ?? this.position,
       duration: duration ?? this.duration,
       errorMessage: errorMessage ?? this.errorMessage,
+      volume: volume ?? this.volume,
     );
   }
 
@@ -67,5 +71,6 @@ class PlayerState extends Equatable {
     position,
     duration,
     errorMessage,
+    volume,
   ];
 }

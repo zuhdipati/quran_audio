@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:just_audio/just_audio.dart' as ja;
+import 'package:quran_audio/core/const/endpoints.dart';
 import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_event.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
@@ -28,6 +29,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
     on<UpdateDuration>(_onUpdateDuration);
     on<AudioCompleted>(_onAudioCompleted);
     on<StopAudio>(_onStopAudio);
+    on<SetQuranVolume>(_onSetQuranVolume);
 
     _listenToAudioPlayer();
   }
@@ -52,7 +54,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
 
   // builds the cdn url for the requested surah audio
   String _buildAudioUrl(String editionIdentifier, int surahNumber) {
-    return 'https://cdn.islamic.network/quran/audio-surah/128/$editionIdentifier/$surahNumber.mp3';
+    return urlSurahAudio(editionIdentifier, surahNumber);
   }
 
   // loads a new surah audio file into the player and auto plays it
@@ -190,6 +192,16 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   Future<void> _onStopAudio(StopAudio event, Emitter<PlayerState> emit) async {
     await _audioPlayer.stop();
     emit(state.copyWith(status: PlayerStatus.initial));
+  }
+
+  // sets the recitation volume so it can be balanced against nature sounds
+  Future<void> _onSetQuranVolume(
+    SetQuranVolume event,
+    Emitter<PlayerState> emit,
+  ) async {
+    final volume = event.volume.clamp(0.0, 1.0);
+    emit(state.copyWith(volume: volume));
+    await _audioPlayer.setVolume(volume);
   }
 
   // cleans up subscriptions and player resources

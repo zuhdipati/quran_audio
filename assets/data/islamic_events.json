@@ -1,0 +1,62 @@
+[
+ {
+  "month": 1,
+  "day": 1,
+  "name": "Tahun Baru Islam",
+  "description": "1 Muharram"
+ },
+ {
+  "month": 1,
+  "day": 10,
+  "name": "Hari Asyura",
+  "description": "Disunnahkan puasa Asyura"
+ },
+ {
+  "month": 3,
+  "day": 12,
+  "name": "Maulid Nabi Muhammad ﷺ",
+  "description": "12 Rabiul Awal"
+ },
+ {
+  "month": 7,
+  "day": 27,
+  "name": "Isra' Mi'raj",
+  "description": "27 Rajab"
+ },
+ {
+  "month": 8,
+  "day": 15,
+  "name": "Nisfu Sya'ban",
+  "description": "15 Syaban"
+ },
+ {
+  "month": 9,
+  "day": 1,
+  "name": "Awal Ramadhan",
+  "description": "Awal puasa Ramadhan"
+ },
+ {
+  "month": 9,
+  "day": 17,
+  "name": "Nuzulul Qur'an",
+  "description": "17 Ramadhan"
+ },
+ {
+  "month": 10,
+  "day": 1,
+  "name": "Idul Fitri",
+  "description": "1 Syawal"
+ },
+ {
+  "month": 12,
+  "day": 9,
+  "name": "Hari Arafah",
+  "description": "Disunnahkan puasa Arafah"
+ },
+ {
+  "month": 12,
+  "day": 10,
+  "name": "Idul Adha",
+  "description": "10 Dzulhijjah"
+ }
+]

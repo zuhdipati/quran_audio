@@ -4,6 +4,7 @@ import 'package:quran_audio/core/error/exception.dart';
 import 'package:quran_audio/core/error/failure.dart';
 import 'package:quran_audio/features/quran/data/datasources/local_datasource.dart';
 import 'package:quran_audio/features/quran/data/datasources/remote_datasource.dart';
+import 'package:quran_audio/features/quran/data/models/edition_model.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 import 'package:quran_audio/features/quran/domain/repositories/quran_repository.dart';
@@ -27,16 +28,25 @@ class QuranRepositoryImpl implements QuranRepository {
       if (hasConnection) {
         final result = await remoteDataSource.getAllEdition();
         await localDataSource.cacheEditions(result);
-        return Right(result.map((e) => e.toEntity()).toList());
+        return Right(await _withProfiles(result));
       } else {
         final cachedResult = await localDataSource.getAllEdition();
-        return Right(cachedResult.map((e) => e.toEntity()).toList());
+        return Right(await _withProfiles(cachedResult));
       }
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
       return Left(Failure('An unexpected error occurred'));
     }
+  }
+
+  // applies curated names and photos, and drops duplicate/unusable editions
+  Future<List<EditionEntity>> _withProfiles(List<EditionModel> editions) async {
+    final profiles = await localDataSource.getQoriProfiles();
+    return editions
+        .where((e) => profiles[e.identifier]?.hidden != true)
+        .map((e) => e.toEntity(profile: profiles[e.identifier]))
+        .toList();
   }
 
   @override

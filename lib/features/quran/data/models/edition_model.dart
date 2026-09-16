@@ -1,4 +1,5 @@
 import 'package:hive/hive.dart';
+import 'package:quran_audio/features/quran/data/models/qori_profile_model.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 
 part 'edition_model.g.dart';
@@ -74,12 +75,13 @@ class EditionModel {
     "direction": direction,
   };
 
-  EditionEntity toEntity() {
+  EditionEntity toEntity({QoriProfileModel? profile}) {
     return EditionEntity(
       identifier: identifier ?? '',
       language: language ?? '',
       name: name ?? '',
-      englishName: englishName ?? '',
+      englishName: profile?.name ?? englishName ?? '',
+      photoUrl: profile?.photoUrl,
     );
   }
 }

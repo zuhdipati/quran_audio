@@ -58,4 +58,13 @@ class UpdateDuration extends PlayerEvent {
 
 class AudioCompleted extends PlayerEvent {}
 
+class SetQuranVolume extends PlayerEvent {
+  final double volume;
+
+  const SetQuranVolume(this.volume);
+
+  @override
+  List<Object> get props => [volume];
+}
+
 class StopAudio extends PlayerEvent {}

@@ -1,22 +1,32 @@
+import 'dart:math' as math;
+
+import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:audio_video_progress_bar/audio_video_progress_bar.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/core/themes/app_themes.dart';
+import 'package:quran_audio/core/widgets/night_scaffold.dart';
+import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
+import 'package:quran_audio/features/quran/presentation/bloc/ambient/ambient_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_event.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
+import 'package:quran_audio/features/quran/presentation/widgets/ambient_mixer_sheet.dart';
+import 'package:quran_audio/features/quran/presentation/widgets/qori_avatar.dart';
 
 class AudioPlayerPage extends StatefulWidget {
   final SurahEntity surah;
   final String editionIdentifier;
   final List<SurahEntity> surahList;
+  final EditionEntity? edition;
 
   const AudioPlayerPage({
     super.key,
     required this.surah,
     required this.editionIdentifier,
     required this.surahList,
+    this.edition,
   });
 
   @override
@@ -24,6 +34,9 @@ class AudioPlayerPage extends StatefulWidget {
 }
 
 class _AudioPlayerPageState extends State<AudioPlayerPage> {
+  late final AmbientBloc _ambientBloc;
+  bool _stopped = false;
+
   @override
   void initState() {
     super.initState();
@@ -34,225 +47,253 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
         surahList: widget.surahList,
       ),
     );
+    _ambientBloc = context.read<AmbientBloc>()..add(AmbientSoundsRequested());
+  }
+
+  void _stopEverything() {
+    if (_stopped) return;
+    _stopped = true;
+    context.read<PlayerBloc>().add(StopAudio());
+    _ambientBloc.add(AmbientStopped());
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        backgroundColor: Colors.white,
-        elevation: 0,
-        centerTitle: true,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: AppColors.black),
-          onPressed: () {
-            context.read<PlayerBloc>().add(StopAudio());
-            Navigator.of(context).pop();
-          },
-        ),
-        title: BlocBuilder<PlayerBloc, PlayerState>(
-          builder: (context, state) {
-            final surahName = state.currentSurah?.englishName ?? 'Loading...';
-            return Text(
-              'Surah $surahName',
-              style: const TextStyle(
-                color: AppColors.black,
-                fontWeight: FontWeight.bold,
-                fontSize: 18,
+    return PopScope(
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) _stopEverything();
+      },
+      child: NightScaffold(
+        title: 'Now Playing',
+        onBack: () {
+          _stopEverything();
+          Navigator.of(context).pop();
+        },
+        body: LayoutBuilder(
+          builder: (context, constraints) {
+            final compact = constraints.maxHeight < 640;
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24, 0, 24, 16),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: BlocBuilder<PlayerBloc, PlayerState>(
+                      buildWhen: (p, c) =>
+                          p.currentSurah != c.currentSurah ||
+                          p.position != c.position ||
+                          p.duration != c.duration,
+                      builder: (context, state) => _Artwork(
+                        surah: state.currentSurah ?? widget.surah,
+                        position: state.position,
+                        duration: state.duration,
+                      ),
+                    ),
+                  ),
+                  SizedBox(height: compact ? 8 : 20),
+                  _TrackInfo(fallback: widget.surah, edition: widget.edition),
+                  SizedBox(height: compact ? 8 : 20),
+                  const _ProgressSection(),
+                  const _Controls(),
+                  SizedBox(height: compact ? 8 : 16),
+                  const _AmbienceStrip(),
+                ],
               ),
             );
           },
         ),
       ),
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 20.0),
-        child: Column(
+    );
+  }
+}
+
+class _TrackInfo extends StatelessWidget {
+  final SurahEntity fallback;
+  final EditionEntity? edition;
+
+  const _TrackInfo({required this.fallback, required this.edition});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PlayerBloc, PlayerState>(
+      buildWhen: (p, c) => p.currentSurah != c.currentSurah,
+      builder: (context, state) {
+        final surah = state.currentSurah;
+        final title = surah == null
+            ? 'Loading...'
+            : 'Surah ${surah.englishName}';
+        final display = surah ?? fallback;
+        return Column(
           children: [
-            Expanded(
-              child: Container(
-                width: double.infinity,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      AppColors.primary.withValues(alpha: 0.6),
-                      AppColors.primary,
-                    ],
-                  ),
-                  borderRadius: BorderRadius.circular(32.0),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.3),
-                      blurRadius: 20,
-                      offset: const Offset(0, 10),
-                    ),
-                  ],
-                ),
-                child: Center(
-                  child: BlocBuilder<PlayerBloc, PlayerState>(
-                    builder: (context, state) {
-                      final surah = state.currentSurah;
-                      return Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.all(32),
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: Colors.white.withValues(alpha: 0.15),
-                            ),
-                            child: const Icon(
-                              Icons.audiotrack_rounded,
-                              size: 72,
-                              color: Colors.white,
-                            ),
-                          ),
-                          const SizedBox(height: 32),
-                          Text(
-                            surah?.name ?? '',
-                            textDirection: TextDirection.rtl,
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 36,
-                              shadows: [
-                                Shadow(
-                                  color: Colors.black26,
-                                  blurRadius: 10,
-                                  offset: Offset(0, 2),
-                                )
-                              ],
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          Text(
-                            surah?.englishName ?? 'Loading...',
-                            style: TextStyle(
-                              color: Colors.white.withValues(alpha: 0.9),
-                              fontWeight: FontWeight.w500,
-                              fontSize: 20,
-                              letterSpacing: 1.2,
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${display.englishNameTranslation} · ${display.numberOfAyahs} ayahs · ${display.revelationType}',
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 13,
+                color: AppColors.textSecondary,
               ),
             ),
-            const SizedBox(height: 40),
-            BlocBuilder<PlayerBloc, PlayerState>(
-              builder: (context, state) {
-                return ProgressBar(
-                  progress: state.position,
-                  total: state.duration,
-                  progressBarColor: AppColors.primary,
-                  baseBarColor: AppColors.lightGrey,
-                  thumbColor: AppColors.primary,
-                  timeLabelTextStyle: const TextStyle(
-                    color: AppColors.primary,
-                    fontWeight: FontWeight.w600,
+            if (edition != null) ...[
+              const SizedBox(height: 12),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  QoriAvatar(
+                    name: edition!.englishName,
+                    photoUrl: edition!.photoUrl,
+                    size: 26,
                   ),
-                  onSeek: (duration) {
-                    context.read<PlayerBloc>().add(SeekAudio(duration));
-                  },
+                  const SizedBox(width: 8),
+                  Flexible(
+                    child: Text(
+                      edition!.englishName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ProgressSection extends StatelessWidget {
+  const _ProgressSection();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PlayerBloc, PlayerState>(
+      buildWhen: (p, c) => p.position != c.position || p.duration != c.duration,
+      builder: (context, state) {
+        return ProgressBar(
+          progress: state.position,
+          total: state.duration,
+          progressBarColor: AppColors.primary,
+          baseBarColor: AppColors.border,
+          bufferedBarColor: AppColors.border,
+          thumbColor: AppColors.starlight,
+          thumbGlowColor: AppColors.primarySoft,
+          thumbRadius: 6,
+          barHeight: 3,
+          timeLabelPadding: 6,
+          timeLabelTextStyle: const TextStyle(
+            fontSize: 12,
+            color: AppColors.textMuted,
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+          onSeek: (duration) {
+            context.read<PlayerBloc>().add(SeekAudio(duration));
+          },
+        );
+      },
+    );
+  }
+}
+
+class _Controls extends StatelessWidget {
+  const _Controls();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<PlayerBloc, PlayerState>(
+      builder: (context, state) {
+        return Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            IconButton(
+              icon: const Icon(
+                Icons.replay_10,
+                size: 28,
+                color: AppColors.textSecondary,
+              ),
+              onPressed: () {
+                final newPos = state.position - const Duration(seconds: 10);
+                context.read<PlayerBloc>().add(
+                  SeekAudio(newPos < Duration.zero ? Duration.zero : newPos),
                 );
               },
             ),
-            const SizedBox(height: 20),
-            BlocBuilder<PlayerBloc, PlayerState>(
-              builder: (context, state) {
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.replay_10,
-                        size: 32,
-                        color: AppColors.textGrey,
-                      ),
-                      onPressed: () {
-                        final newPos =
-                            state.position - const Duration(seconds: 10);
-                        context.read<PlayerBloc>().add(
-                          SeekAudio(
-                            newPos < Duration.zero ? Duration.zero : newPos,
-                          ),
-                        );
-                      },
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.skip_previous,
-                        size: 40,
-                        color: state.hasPreviousSurah
-                            ? AppColors.textGrey
-                            : AppColors.lightGrey,
-                      ),
-                      onPressed: state.hasPreviousSurah
-                          ? () =>
-                                context.read<PlayerBloc>().add(PreviousSurah())
-                          : null,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        if (state.status == PlayerStatus.playing) {
-                          context.read<PlayerBloc>().add(PauseAudio());
-                        } else if (state.status == PlayerStatus.paused ||
-                            state.status == PlayerStatus.completed) {
-                          context.read<PlayerBloc>().add(ResumeAudio());
-                        } else if (state.status == PlayerStatus.initial) {
-                          context.read<PlayerBloc>().add(PlayAudio());
-                        }
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.all(20),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: _buildPlayPauseIcon(state.status),
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(
-                        Icons.skip_next,
-                        size: 40,
-                        color: state.hasNextSurah
-                            ? AppColors.textGrey
-                            : AppColors.lightGrey,
-                      ),
-                      onPressed: state.hasNextSurah
-                          ? () => context.read<PlayerBloc>().add(NextSurah())
-                          : null,
-                    ),
-                    IconButton(
-                      icon: const Icon(
-                        Icons.forward_10,
-                        size: 32,
-                        color: AppColors.textGrey,
-                      ),
-                      onPressed: () {
-                        final newPos =
-                            state.position + const Duration(seconds: 10);
-                        context.read<PlayerBloc>().add(
-                          SeekAudio(
-                            newPos > state.duration ? state.duration : newPos,
-                          ),
-                        );
-                      },
+            IconButton(
+              icon: Icon(
+                Icons.skip_previous,
+                size: 36,
+                color: state.hasPreviousSurah
+                    ? AppColors.textPrimary
+                    : AppColors.textMuted.withValues(alpha: 0.5),
+              ),
+              onPressed: state.hasPreviousSurah
+                  ? () => context.read<PlayerBloc>().add(PreviousSurah())
+                  : null,
+            ),
+            GestureDetector(
+              onTap: () {
+                if (state.status == PlayerStatus.playing) {
+                  context.read<PlayerBloc>().add(PauseAudio());
+                } else if (state.status == PlayerStatus.paused ||
+                    state.status == PlayerStatus.completed) {
+                  context.read<PlayerBloc>().add(ResumeAudio());
+                } else if (state.status == PlayerStatus.initial) {
+                  context.read<PlayerBloc>().add(PlayAudio());
+                }
+              },
+              child: Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppColors.primary,
+                  shape: BoxShape.circle,
+                  boxShadow: [
+                    BoxShadow(
+                      color: AppColors.primary.withValues(alpha: 0.25),
+                      blurRadius: 24,
                     ),
                   ],
+                ),
+                child: Center(child: _buildPlayPauseIcon(state.status)),
+              ),
+            ),
+            IconButton(
+              icon: Icon(
+                Icons.skip_next,
+                size: 36,
+                color: state.hasNextSurah
+                    ? AppColors.textPrimary
+                    : AppColors.textMuted.withValues(alpha: 0.5),
+              ),
+              onPressed: state.hasNextSurah
+                  ? () => context.read<PlayerBloc>().add(NextSurah())
+                  : null,
+            ),
+            IconButton(
+              icon: const Icon(
+                Icons.forward_10,
+                size: 28,
+                color: AppColors.textSecondary,
+              ),
+              onPressed: () {
+                final newPos = state.position + const Duration(seconds: 10);
+                context.read<PlayerBloc>().add(
+                  SeekAudio(newPos > state.duration ? state.duration : newPos),
                 );
               },
             ),
-
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 }
@@ -260,13 +301,251 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
 Widget _buildPlayPauseIcon(PlayerStatus status) {
   if (status == PlayerStatus.loading) {
     return const SizedBox(
-      width: 32,
-      height: 32,
-      child: CircularProgressIndicator(color: Colors.white, strokeWidth: 3),
+      width: 26,
+      height: 26,
+      child: CircularProgressIndicator(
+        color: AppColors.onPrimary,
+        strokeWidth: 2.5,
+      ),
     );
   } else if (status == PlayerStatus.playing) {
-    return const Icon(Icons.pause, size: 32, color: Colors.white);
+    return const Icon(Icons.pause, size: 34, color: AppColors.onPrimary);
   } else {
-    return const Icon(Icons.play_arrow, size: 32, color: Colors.white);
+    return const Icon(Icons.play_arrow, size: 36, color: AppColors.onPrimary);
   }
+}
+
+class _AmbienceStrip extends StatelessWidget {
+  const _AmbienceStrip();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<AmbientBloc, AmbientState>(
+      builder: (context, state) {
+        final active = state.activeSounds;
+        return Container(
+          padding: const EdgeInsets.fromLTRB(14, 10, 6, 10),
+          decoration: BoxDecoration(
+            color: AppColors.surface.withValues(alpha: 0.75),
+            borderRadius: BorderRadius.circular(18),
+            border: Border.all(color: AppColors.border),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      active.isEmpty
+                          ? 'Nature sounds'
+                          : active.map((s) => s.name).join(' + '),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => AmbientMixerSheet.show(context),
+                    icon: const Icon(Icons.tune_rounded, size: 18),
+                    label: const Text('Mixer'),
+                    style: TextButton.styleFrom(
+                      visualDensity: VisualDensity.compact,
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(
+                height: 78,
+                child: state.sounds.isEmpty
+                    ? const SizedBox.shrink()
+                    : ListView.separated(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: state.sounds.length,
+                        separatorBuilder: (_, _) => const SizedBox(width: 10),
+                        itemBuilder: (context, index) {
+                          final sound = state.sounds[index];
+                          return SizedBox(
+                            width: 58,
+                            child: AmbientSoundButton(
+                              sound: sound,
+                              isActive: state.isActive(sound.id),
+                              size: 40,
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+}
+
+/// Night-sky disc: the ring of stars turns and the gold arc fills as the
+/// recitation plays.
+class _Artwork extends StatelessWidget {
+  final SurahEntity surah;
+  final Duration position;
+  final Duration duration;
+
+  const _Artwork({
+    required this.surah,
+    required this.position,
+    required this.duration,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = duration.inMilliseconds == 0
+        ? 0.0
+        : (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final size = math.min(
+          math.min(constraints.maxWidth, constraints.maxHeight),
+          320.0,
+        );
+        if (size < 80) return const SizedBox.shrink();
+        return Center(
+          child: SizedBox.square(
+            dimension: size,
+            child: CustomPaint(
+              painter: _ArtworkPainter(
+                progress: progress,
+                rotation: position.inMilliseconds / 120000 * math.pi * 2,
+              ),
+              child: Center(
+                child: Padding(
+                  padding: EdgeInsets.all(size * 0.2),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      FittedBox(
+                        child: Text(
+                          surah.name,
+                          textDirection: TextDirection.rtl,
+                          style: AppTheme.arabic(
+                            fontSize: size * 0.13,
+                            height: 1.5,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                      ),
+                      Text(
+                        'SURAH ${surah.number}',
+                        style: TextStyle(
+                          fontSize: math.max(9, size * 0.035),
+                          letterSpacing: 2,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ArtworkPainter extends CustomPainter {
+  final double progress;
+  final double rotation;
+
+  _ArtworkPainter({required this.progress, required this.rotation});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = size.center(Offset.zero);
+    final radius = size.width / 2;
+
+    // soft moonlight behind the disc
+    canvas.drawCircle(
+      center,
+      radius * 0.78,
+      Paint()
+        ..color = AppColors.primary.withValues(alpha: 0.07)
+        ..maskFilter = MaskFilter.blur(BlurStyle.normal, radius * 0.2),
+    );
+
+    final discRect = Rect.fromCircle(center: center, radius: radius * 0.7);
+    canvas.drawCircle(
+      center,
+      radius * 0.7,
+      Paint()
+        ..shader = const RadialGradient(
+          center: Alignment(-0.3, -0.4),
+          colors: [AppColors.surfaceHigh, AppColors.skyTop],
+        ).createShader(discRect),
+    );
+    canvas.drawCircle(
+      center,
+      radius * 0.7,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..color = AppColors.border,
+    );
+    canvas.drawCircle(
+      center,
+      radius * 0.6,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 0.6
+        ..color = AppColors.primary.withValues(alpha: 0.25),
+    );
+
+    // rotating ring of stars
+    final random = math.Random(19);
+    for (var i = 0; i < 36; i++) {
+      final angle = rotation + i * math.pi * 2 / 36;
+      final distance = radius * (0.8 + random.nextDouble() * 0.08);
+      canvas.drawCircle(
+        center + Offset(math.cos(angle), math.sin(angle)) * distance,
+        0.6 + random.nextDouble() * 1.1,
+        Paint()
+          ..color = AppColors.starlight.withValues(
+            alpha: 0.25 + random.nextDouble() * 0.6,
+          ),
+      );
+    }
+
+    // progress arc
+    final arcRect = Rect.fromCircle(center: center, radius: radius * 0.96);
+    canvas.drawCircle(
+      center,
+      radius * 0.96,
+      Paint()
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2
+        ..color = AppColors.border,
+    );
+    if (progress > 0) {
+      canvas.drawArc(
+        arcRect,
+        -math.pi / 2,
+        math.pi * 2 * progress,
+        false,
+        Paint()
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 2.5
+          ..strokeCap = StrokeCap.round
+          ..color = AppColors.primary,
+      );
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _ArtworkPainter oldDelegate) =>
+      oldDelegate.progress != progress || oldDelegate.rotation != rotation;
 }

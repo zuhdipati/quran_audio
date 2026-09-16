@@ -3,11 +3,23 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive/hive.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:quran_audio/core/utils/asset_json_loader.dart';
 import 'package:quran_audio/features/quran/data/datasources/local_datasource.dart';
 
 import '../../dummy_data/dummy_objects.dart';
 
 class MockBox extends Mock implements Box {}
+
+class FakeLoader extends AssetJsonLoader {
+  final dynamic data;
+  FakeLoader(this.data);
+
+  @override
+  Future<dynamic> load(String path) async {
+    if (data is Exception) throw data;
+    return data;
+  }
+}
 
 void main() {
   late QuranLocalDataSourceImpl dataSource;
@@ -19,16 +31,19 @@ void main() {
   });
 
   group('getAllEdition', () {
-    test('should return list of EditionModel from cache when there is one in the cache', () async {
-      // arrange
-      when(() => mockBox.get('all_edition')).thenReturn(tEditionModelList);
+    test(
+      'should return list of EditionModel from cache when there is one in the cache',
+      () async {
+        // arrange
+        when(() => mockBox.get('all_edition')).thenReturn(tEditionModelList);
 
-      // act
-      final result = await dataSource.getAllEdition();
+        // act
+        final result = await dataSource.getAllEdition();
 
-      // assert
-      expect(result, equals(tEditionModelList));
-    });
+        // assert
+        expect(result, equals(tEditionModelList));
+      },
+    );
 
     test('should return empty list when cache is empty', () async {
       // arrange
@@ -45,7 +60,9 @@ void main() {
   group('cacheEditions', () {
     test('should call Box to cache the data', () async {
       // arrange
-      when(() => mockBox.put('all_edition', tEditionModelList)).thenAnswer((_) async => Future.value());
+      when(
+        () => mockBox.put('all_edition', tEditionModelList),
+      ).thenAnswer((_) async => Future.value());
 
       // act
       await dataSource.cacheEditions(tEditionModelList);
@@ -56,17 +73,27 @@ void main() {
   });
 
   group('getDefaultSurahs', () {
-    test('should return list of SurahModel from cache when there is one in the cache', () async {
-      // arrange
-      final expectedJsonString = jsonEncode(tSurahModelList.map((e) => e.toJson()).toList());
-      when(() => mockBox.get('default_surahs')).thenReturn(expectedJsonString);
+    test(
+      'should return list of SurahModel from cache when there is one in the cache',
+      () async {
+        // arrange
+        final expectedJsonString = jsonEncode(
+          tSurahModelList.map((e) => e.toJson()).toList(),
+        );
+        when(
+          () => mockBox.get('default_surahs'),
+        ).thenReturn(expectedJsonString);
 
-      // act
-      final result = await dataSource.getDefaultSurahs();
+        // act
+        final result = await dataSource.getDefaultSurahs();
 
-      // assert
-      expect(result.map((e) => e.toEntity()).toList(), equals(tSurahEntityList));
-    });
+        // assert
+        expect(
+          result.map((e) => e.toEntity()).toList(),
+          equals(tSurahEntityList),
+        );
+      },
+    );
 
     test('should return empty list when cache is empty', () async {
       // arrange
@@ -90,13 +117,44 @@ void main() {
       }).toList();
       final expectedJsonString = jsonEncode(expectedList);
 
-      when(() => mockBox.put('default_surahs', expectedJsonString)).thenAnswer((_) async => Future.value());
+      when(
+        () => mockBox.put('default_surahs', expectedJsonString),
+      ).thenAnswer((_) async => Future.value());
 
       // act
       await dataSource.cacheDefaultSurahs(tSurahModelList);
 
       // assert
       verify(() => mockBox.put('default_surahs', expectedJsonString)).called(1);
+    });
+  });
+
+  group('getQoriProfiles', () {
+    test('should parse bundled profiles keyed by identifier', () async {
+      final ds = QuranLocalDataSourceImpl(
+        box: mockBox,
+        loader: FakeLoader({
+          'ar.alafasy': {
+            'name': 'Mishary Rashid Alafasy',
+            'photo': 'https://img',
+          },
+          'ar.hidden': {'hidden': true},
+        }),
+      );
+
+      final result = await ds.getQoriProfiles();
+
+      expect(result['ar.alafasy']!.photoUrl, equals('https://img'));
+      expect(result['ar.hidden']!.hidden, isTrue);
+    });
+
+    test('should return an empty map when the asset cannot be read', () async {
+      final ds = QuranLocalDataSourceImpl(
+        box: mockBox,
+        loader: FakeLoader(Exception('x')),
+      );
+
+      expect(await ds.getQoriProfiles(), isEmpty);
     });
   });
 }

@@ -48,9 +48,20 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
 
         final editionDirs = bitrateDir['contents'] as List<dynamic>;
 
-        final editions = editionDirs
+        // the cdn listing is the source of truth for playable surah audio
+        final identifiers = editionDirs
             .where((dir) => dir['type'] == 'directory')
-            .map((dir) => EditionModel.fromIdentifier(dir['name'] as String))
+            .map((dir) => dir['name'] as String)
+            .toList();
+
+        final namedEditions = await _getNamedAudioEditions();
+
+        final editions = identifiers
+            .map(
+              (identifier) =>
+                  namedEditions[identifier] ??
+                  EditionModel.fromIdentifier(identifier),
+            )
             .toList();
 
         editions.sort(
@@ -79,6 +90,32 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         stackTrace: stackTrace,
       );
       throw GeneralException(message: 'An unexpected error occurred');
+    }
+  }
+
+  // readable reciter names (latin and arabic) keyed by identifier; names are
+  // cosmetic, so a failure here falls back to identifier-derived names
+  Future<Map<String, EditionModel>> _getNamedAudioEditions() async {
+    try {
+      final response = await dio.get(
+        urlGetAudioEditions,
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          receiveTimeout: const Duration(seconds: 30),
+          sendTimeout: const Duration(seconds: 30),
+        ),
+      );
+      if (response.statusCode != 200 || response.data is! Map) return {};
+
+      final List<dynamic> data = response.data['data'] ?? [];
+      return {
+        for (final json in data.whereType<Map<String, dynamic>>())
+          if (json['identifier'] != null)
+            json['identifier'] as String: EditionModel.fromJson(json),
+      };
+    } catch (e) {
+      AppLogger.w('Failed to load reciter names', error: e);
+      return {};
     }
   }
 

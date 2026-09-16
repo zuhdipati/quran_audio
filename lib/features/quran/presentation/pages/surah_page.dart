@@ -2,14 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:quran_audio/core/utils/toast_utils.dart';
+import 'package:quran_audio/core/routes/route_paths.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
+import 'package:quran_audio/core/utils/toast_utils.dart';
+import 'package:quran_audio/core/widgets/night_scaffold.dart';
+import 'package:quran_audio/core/widgets/search_field.dart';
+import 'package:quran_audio/core/widgets/state_views.dart';
+import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_list_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/edition_bottom_sheet.dart';
+import 'package:quran_audio/features/quran/presentation/widgets/qori_avatar.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/surah_tile.dart';
-import 'package:quran_audio/core/utils/qori_name_formatter.dart';
 
 class SurahPage extends StatelessWidget {
   const SurahPage({super.key});
@@ -28,20 +33,42 @@ class SurahPageView extends StatefulWidget {
 }
 
 class _SurahPageViewState extends State<SurahPageView> {
+  static const _defaultEdition = EditionEntity(
+    identifier: 'ar.alafasy',
+    language: 'ar',
+    name: 'مشاري العفاسي',
+    englishName: 'Mishary Rashid Alafasy',
+  );
+
   @override
   void initState() {
     super.initState();
-    context.read<EditionBloc>().add(GetEditions());
-    context.read<SurahListBloc>().add(
-      FetchSurahs(
-        EditionEntity(
-          identifier: 'ar.alafasy',
-          language: 'ar',
-          name: 'Alafasy',
-          englishName: 'Alafasy',
-        ),
-      ),
-    );
+    final editionBloc = context.read<EditionBloc>();
+    if (editionBloc.state is! EditionLoaded) editionBloc.add(GetEditions());
+
+    final surahBloc = context.read<SurahListBloc>();
+    if (surahBloc.state is SurahListInitial ||
+        surahBloc.state is SurahListError) {
+      surahBloc.add(const FetchSurahs(_defaultEdition));
+    }
+  }
+
+  EditionEntity? _currentEdition(SurahListState state) {
+    if (state is SurahListLoaded) return state.currentEdition;
+    if (state is SurahListLoading) return state.currentEdition;
+    return null;
+  }
+
+  // prefers the fully loaded edition (with photo) over the stored one
+  EditionEntity? _resolveEdition(BuildContext context, EditionEntity? edition) {
+    if (edition == null) return null;
+    final editionState = context.watch<EditionBloc>().state;
+    if (editionState is EditionLoaded) {
+      for (final loaded in editionState.allEditions) {
+        if (loaded.identifier == edition.identifier) return loaded;
+      }
+    }
+    return edition;
   }
 
   void _showEditionSelector(BuildContext context) async {
@@ -55,16 +82,9 @@ class _SurahPageViewState extends State<SurahPageView> {
     if (!context.mounted) return;
 
     final EditionBloc qoriBloc = context.read<EditionBloc>();
-
     qoriBloc.add(const SearchEditions(''));
 
-    final surahListState = context.read<SurahListBloc>().state;
-    EditionEntity? currentEdition;
-    if (surahListState is SurahListLoaded) {
-      currentEdition = surahListState.currentEdition;
-    } else if (surahListState is SurahListLoading) {
-      currentEdition = surahListState.currentEdition;
-    }
+    final currentEdition = _currentEdition(context.read<SurahListBloc>().state);
 
     final selectedEdition = await showModalBottomSheet<EditionEntity>(
       context: context,
@@ -83,100 +103,29 @@ class _SurahPageViewState extends State<SurahPageView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text(
-          'My Quran',
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 22),
-        ),
-      ),
+    return NightScaffold(
+      title: "Al-Qur'an",
       body: Column(
         children: [
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Surah',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.black,
-                  ),
-                ),
-                GestureDetector(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+            child: BlocBuilder<SurahListBloc, SurahListState>(
+              builder: (context, state) {
+                final edition = _resolveEdition(
+                  context,
+                  _currentEdition(state),
+                );
+                return _QoriSelector(
+                  edition: edition,
                   onTap: () => _showEditionSelector(context),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.primary),
-                    ),
-                    child: BlocBuilder<SurahListBloc, SurahListState>(
-                      builder: (context, state) {
-                        String editionName = 'Default';
-                        if (state is SurahListLoading &&
-                            state.currentEdition != null) {
-                          editionName = state.currentEdition!.englishName;
-                        } else if (state is SurahListLoaded) {
-                          editionName = state.currentEdition.englishName;
-                        }
-                        return Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Icon(
-                              Icons.person_outline,
-                              size: 16,
-                              color: AppColors.primary,
-                            ),
-                            const SizedBox(width: 6),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(maxWidth: 120),
-                              child: Text(
-                                'Qori: ${editionName.formatQoriName}',
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: AppColors.primary,
-                                  fontWeight: FontWeight.w600,
-                                  fontSize: 14,
-                                ),
-                              ),
-                            ),
-                            const SizedBox(width: 4),
-                            const Icon(
-                              Icons.keyboard_arrow_down,
-                              color: AppColors.primary,
-                              size: 16,
-                            ),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
+                );
+              },
             ),
           ),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-            child: TextField(
-              decoration: InputDecoration(
-                hintText: 'Search surah...',
-                prefixIcon: const Icon(Icons.search, color: AppColors.textGrey),
-                filled: true,
-                fillColor: AppColors.lightGrey.withValues(alpha: 0.3),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide.none,
-                ),
-                contentPadding: EdgeInsets.zero,
-              ),
+            padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
+            child: SearchField(
+              hintText: 'Search surah…',
               onChanged: (query) {
                 context.read<SurahListBloc>().add(SearchSurahs(query));
               },
@@ -186,18 +135,19 @@ class _SurahPageViewState extends State<SurahPageView> {
             child: BlocBuilder<SurahListBloc, SurahListState>(
               builder: (context, state) {
                 if (state is SurahListLoading) {
-                  return const Center(
-                    child: CircularProgressIndicator(color: AppColors.primary),
-                  );
+                  return const LoadingView();
                 } else if (state is SurahListLoaded) {
                   if (state.filteredSurahs.isEmpty) {
-                    return const Center(child: Text('No surahs found.'));
+                    return const MessageView(message: 'No surahs found.');
                   }
                   return ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 32),
                     itemCount: state.filteredSurahs.length,
-                    separatorBuilder: (context, index) => const Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 20),
-                      child: Divider(height: 1, color: AppColors.lightGrey),
+                    separatorBuilder: (context, index) => const Divider(
+                      height: 1,
+                      indent: 78,
+                      endIndent: 20,
+                      color: AppColors.border,
                     ),
                     itemBuilder: (context, index) {
                       final surah = state.filteredSurahs[index];
@@ -214,11 +164,15 @@ class _SurahPageViewState extends State<SurahPageView> {
                           }
                           if (context.mounted) {
                             context.push(
-                              '/player',
+                              RoutePaths.player,
                               extra: {
                                 'surah': surah,
                                 'editionIdentifier':
                                     state.currentEdition.identifier,
+                                'edition': _resolveEdition(
+                                  context,
+                                  state.currentEdition,
+                                ),
                                 'surahList': state.allSurahs,
                               },
                             );
@@ -228,13 +182,76 @@ class _SurahPageViewState extends State<SurahPageView> {
                     },
                   );
                 } else if (state is SurahListError) {
-                  return Center(child: Text(state.message));
+                  return MessageView(
+                    message: state.message,
+                    actionLabel: 'Try again',
+                    onAction: () => context.read<SurahListBloc>().add(
+                      const FetchSurahs(_defaultEdition),
+                    ),
+                  );
                 }
 
                 return const SizedBox.shrink();
               },
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _QoriSelector extends StatelessWidget {
+  final EditionEntity? edition;
+  final VoidCallback onTap;
+
+  const _QoriSelector({required this.edition, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final name = edition?.englishName ?? 'Select qori';
+    return SurfaceCard(
+      onTap: onTap,
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      child: Row(
+        children: [
+          QoriAvatar(name: name, photoUrl: edition?.photoUrl, size: 42),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'RECITED BY',
+                  style: TextStyle(
+                    fontSize: 10,
+                    letterSpacing: 0.8,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textMuted,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  name,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const Text(
+            'Change',
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+          const Icon(Icons.expand_more_rounded, color: AppColors.primary),
         ],
       ),
     );
