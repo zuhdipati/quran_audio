@@ -1,2 +1,0 @@
-# tooling for tool/upload_hadith_r2.py
-boto3>=1.34
