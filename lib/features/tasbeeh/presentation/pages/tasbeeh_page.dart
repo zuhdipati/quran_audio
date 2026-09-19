@@ -8,6 +8,9 @@ import 'package:quran_audio/core/utils/haptics.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/features/tasbeeh/presentation/bloc/tasbeeh_bloc.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/widgets/translation_language_note.dart';
 
 class TasbeehPage extends StatefulWidget {
   const TasbeehPage({super.key});
@@ -38,11 +41,11 @@ class _TasbeehPageState extends State<TasbeehPage> {
   @override
   Widget build(BuildContext context) {
     return NightScaffold(
-      title: 'Tasbeeh',
+      title: context.l10n.tasbeehTitle,
       actions: [
         BlocBuilder<TasbeehBloc, TasbeehState>(
           builder: (context, state) => IconButton(
-            tooltip: 'Reset',
+            tooltip: context.l10n.reset,
             icon: const Icon(Icons.restart_alt_rounded),
             onPressed: state.count == 0
                 ? null
@@ -53,7 +56,11 @@ class _TasbeehPageState extends State<TasbeehPage> {
       body: BlocBuilder<TasbeehBloc, TasbeehState>(
         builder: (context, state) {
           if (state.status == TasbeehStatus.error) {
-            return MessageView(message: state.message ?? 'Error');
+            return MessageView(
+              message: context.l10n.errorMessage(
+                state.message ?? ErrorKeys.unexpected,
+              ),
+            );
           }
           final dzikir = state.current;
           if (state.status != TasbeehStatus.loaded || dzikir == null) {
@@ -128,13 +135,20 @@ class _TasbeehPageState extends State<TasbeehPage> {
                           color: AppColors.textSecondary,
                         ),
                       ),
+                      const TranslationLanguageNote(
+                        padding: EdgeInsets.only(top: 6),
+                        alignment: MainAxisAlignment.center,
+                      ),
                       const SizedBox(height: 28),
                       _BeadCounter(state: state, onTap: () => _count(state)),
                       const SizedBox(height: 20),
                       Text(
                         state.completedRounds == 0
-                            ? 'Tap the circle to count'
-                            : '${state.completedRounds} × ${dzikir.target} completed',
+                            ? context.l10n.tapToCount
+                            : context.l10n.roundsCompleted(
+                                state.completedRounds,
+                                dzikir.target,
+                              ),
                         style: const TextStyle(color: AppColors.textMuted),
                       ),
                     ],
@@ -162,7 +176,7 @@ class _BeadCounter extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: 'Count, ${state.count}',
+      label: context.l10n.countSemantics(state.count),
       child: GestureDetector(
         onTap: onTap,
         child: SizedBox.square(

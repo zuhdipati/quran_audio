@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:hive/hive.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:quran_audio/configs/adapters/adapter_conf.dart';
 import 'package:quran_audio/configs/injectors/injector_conf.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/locale/locale_cubit.dart';
 import 'package:quran_audio/core/routes/app_routes.dart';
 import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -34,6 +40,9 @@ void main() async {
     AppLogger.i('Initializing Dependency Injection...');
     await initInjector();
 
+    // month and weekday names for every shipped language
+    await initializeDateFormatting();
+
     AppLogger.i('App Initialization Complete');
   } catch (e, stackTrace) {
     AppLogger.e('Failed to initialize app', error: e, stackTrace: stackTrace);
@@ -57,12 +66,31 @@ class QuranAudioApp extends StatelessWidget {
         BlocProvider<AmbientBloc>(create: (context) => sl<AmbientBloc>()),
         BlocProvider<PrayerTimeBloc>(create: (context) => sl<PrayerTimeBloc>()),
         BlocProvider<DailyDuaBloc>(create: (context) => sl<DailyDuaBloc>()),
+        BlocProvider<LocaleCubit>(
+          create: (context) => LocaleCubit(box: sl<Box>(instanceName: appBox)),
+        ),
       ],
-      child: MaterialApp.router(
-        title: 'Quran Audio',
-        debugShowCheckedModeBanner: false,
-        routerConfig: _router,
-        theme: AppTheme.appTheme,
+      child: BlocBuilder<LocaleCubit, Locale?>(
+        builder: (context, locale) => MaterialApp.router(
+          onGenerateTitle: (context) => context.l10n.appTitle,
+          debugShowCheckedModeBanner: false,
+          routerConfig: _router,
+          theme: AppTheme.appTheme,
+          locale: locale,
+          supportedLocales: AppLocalizations.supportedLocales,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          localeListResolutionCallback: resolveAppLocale,
+          builder: (context, child) {
+            // DateFormat reads this, so dates follow the resolved language
+            Intl.defaultLocale = Localizations.localeOf(context).toString();
+            return child!;
+          },
+        ),
       ),
     );
   }

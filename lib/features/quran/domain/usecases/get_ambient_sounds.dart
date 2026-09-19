@@ -11,3 +11,12 @@ class GetAmbientSounds {
   Future<Either<Failure, List<AmbientSoundEntity>>> call() =>
       repository.getAmbientSounds();
 }
+
+class GetAmbientSoundFile {
+  final AmbientSoundRepository repository;
+
+  GetAmbientSoundFile(this.repository);
+
+  Future<Either<Failure, String>> call(AmbientSoundEntity sound) =>
+      repository.getSoundFile(sound);
+}

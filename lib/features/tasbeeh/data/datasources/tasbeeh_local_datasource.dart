@@ -2,6 +2,7 @@ import 'package:hive/hive.dart';
 import 'package:quran_audio/core/error/exception.dart';
 import 'package:quran_audio/core/utils/asset_json_loader.dart';
 import 'package:quran_audio/features/tasbeeh/data/models/dzikir_model.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 const String dzikirAsset = 'assets/data/dzikir.json';
 
@@ -25,7 +26,7 @@ class TasbeehLocalDataSourceImpl implements TasbeehLocalDataSource {
       final List<dynamic> data = await loader.load(dzikirAsset);
       return data.map((e) => DzikirModel.fromJson(e)).toList();
     } catch (e) {
-      throw GeneralException(message: 'Failed to load dzikir');
+      throw GeneralException(message: ErrorKeys.loadDzikir);
     }
   }
 

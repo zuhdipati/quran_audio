@@ -9,6 +9,7 @@ import 'package:quran_audio/features/prayer_time/data/models/location_model.dart
 import 'package:quran_audio/features/prayer_time/domain/entities/location_entity.dart';
 import 'package:quran_audio/features/prayer_time/domain/entities/prayer_schedule_entity.dart';
 import 'package:quran_audio/features/prayer_time/domain/repositories/prayer_time_repository.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class PrayerTimeRepositoryImpl implements PrayerTimeRepository {
   final LocationDeviceDataSource deviceDataSource;
@@ -40,7 +41,7 @@ class PrayerTimeRepositoryImpl implements PrayerTimeRepository {
       if (refresh) return Left(Failure(e.message));
       return Right((cached ?? LocationModel.fallback).toEntity());
     } catch (e) {
-      if (refresh) return Left(Failure('Unable to determine your location'));
+      if (refresh) return Left(Failure(ErrorKeys.locationUnavailable));
       return Right((cached ?? LocationModel.fallback).toEntity());
     }
   }
@@ -63,7 +64,7 @@ class PrayerTimeRepositoryImpl implements PrayerTimeRepository {
       });
       return Right(schedules);
     } catch (e) {
-      return Left(Failure('Failed to calculate prayer times'));
+      return Left(Failure(ErrorKeys.calculatePrayerTimes));
     }
   }
 

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:quran_audio/features/prayer_time/presentation/bloc/prayer_time/prayer_time_bloc.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 /// Shows the city used for prayer times; tap to use the device location.
 class LocationChip extends StatelessWidget {
@@ -14,10 +15,11 @@ class LocationChip extends StatelessWidget {
       builder: (context, state) {
         final location = state.location;
         final isLoading = state.status == PrayerTimeStatus.loading;
+        final l10n = context.l10n;
         final label = location == null
-            ? 'Locating…'
+            ? l10n.locating
             : location.isFallback
-            ? '${location.city} · set location'
+            ? l10n.setLocation(location.city)
             : location.city;
 
         return InkWell(

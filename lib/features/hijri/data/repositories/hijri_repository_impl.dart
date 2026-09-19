@@ -7,6 +7,7 @@ import 'package:quran_audio/features/hijri/domain/entities/hijri_date_entity.dar
 import 'package:quran_audio/features/hijri/domain/entities/hijri_month_entity.dart';
 import 'package:quran_audio/features/hijri/domain/entities/islamic_event_entity.dart';
 import 'package:quran_audio/features/hijri/domain/repositories/hijri_repository.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class HijriRepositoryImpl implements HijriRepository {
   final HijriLocalDataSource localDataSource;
@@ -56,7 +57,7 @@ class HijriRepositoryImpl implements HijriRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('Hijri date is out of supported range'));
+      return Left(Failure(ErrorKeys.hijriOutOfRange));
     }
   }
 
@@ -82,7 +83,7 @@ class HijriRepositoryImpl implements HijriRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('Failed to load Islamic events'));
+      return Left(Failure(ErrorKeys.loadIslamicEvents));
     }
   }
 
@@ -90,6 +91,8 @@ class HijriRepositoryImpl implements HijriRepository {
     return IslamicEventEntity(
       name: model.name,
       description: model.description,
+      nameEn: model.nameEn,
+      descriptionEn: model.descriptionEn,
       hijriMonth: model.month,
       hijriDay: model.day,
       hijriYear: year,

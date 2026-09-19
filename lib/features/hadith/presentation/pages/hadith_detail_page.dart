@@ -4,6 +4,8 @@ import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/core/widgets/reading_block.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/hadith/domain/entities/hadith_entity.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/widgets/translation_language_note.dart';
 
 class HadithDetailPage extends StatelessWidget {
   final HadithEntity hadith;
@@ -13,13 +15,13 @@ class HadithDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return NightScaffold(
-      title: 'Hadith ${hadith.number}',
+      title: context.l10n.hadithNumbered(hadith.number),
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
           Text(
-            // only the bundled Arbain has titles
-            hadith.title ?? 'Hadith No. ${hadith.number}',
+            // only Arbain has titles
+            hadith.title ?? context.l10n.hadithNumberedLong(hadith.number),
             style: const TextStyle(
               fontSize: 22,
               fontWeight: FontWeight.w700,
@@ -50,6 +52,7 @@ class HadithDetailPage extends StatelessWidget {
               ),
             ),
           ),
+          const TranslationLanguageNote(padding: EdgeInsets.only(top: 10)),
         ],
       ),
     );

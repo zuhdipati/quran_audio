@@ -17,8 +17,9 @@ void main() {
 
   test('should get list of editions from the repository', () async {
     // arrange
-    when(() => mockQuranRepository.getAllEdition())
-        .thenAnswer((_) async => Right(tEditionEntityList));
+    when(
+      () => mockQuranRepository.getAllEdition(),
+    ).thenAnswer((_) async => Right(tEditionEntityList));
 
     // act
     final result = await usecase.call();

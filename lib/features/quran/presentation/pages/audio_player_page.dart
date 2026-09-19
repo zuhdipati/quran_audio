@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/haptics.dart';
+import 'package:quran_audio/core/utils/toast_utils.dart';
 import 'package:quran_audio/core/widgets/celestial_loader.dart';
 import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:quran_audio/core/widgets/night_scaffold.dart';
@@ -16,6 +17,8 @@ import 'package:quran_audio/features/quran/presentation/bloc/player/player_event
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/ambient_mixer_sheet.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/qori_avatar.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/features/quran/presentation/ambient_l10n.dart';
 
 class AudioPlayerPage extends StatefulWidget {
   final SurahEntity surah;
@@ -66,7 +69,7 @@ class _AudioPlayerPageState extends State<AudioPlayerPage> {
         if (didPop) _stopEverything();
       },
       child: NightScaffold(
-        title: 'Now Playing',
+        title: context.l10n.nowPlaying,
         onBack: () {
           _stopEverything();
           Navigator.of(context).pop();
@@ -124,10 +127,11 @@ class _TrackInfo extends StatelessWidget {
     return BlocBuilder<PlayerBloc, PlayerState>(
       buildWhen: (p, c) => p.currentSurah != c.currentSurah,
       builder: (context, state) {
+        final l10n = context.l10n;
         final surah = state.currentSurah;
         final title = surah == null
-            ? 'Loading...'
-            : 'Surah ${surah.englishName}';
+            ? l10n.loading
+            : l10n.surahNamed(surah.englishName);
         final display = surah ?? fallback;
         return Column(
           children: [
@@ -138,7 +142,9 @@ class _TrackInfo extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(
-              '${display.englishNameTranslation} · ${display.numberOfAyahs} ayahs · ${display.revelationType}',
+              '${display.englishNameTranslation} · '
+              '${l10n.ayahCount(display.numberOfAyahs)} · '
+              '${l10n.revelationType(display.revelationType)}',
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontSize: 13,
@@ -333,7 +339,15 @@ class _AmbienceStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AmbientBloc, AmbientState>(
+    return BlocConsumer<AmbientBloc, AmbientState>(
+      // a sound that could not start, e.g. its first download failed
+      // offline; this page sits under the mixer sheet, so it covers both
+      listenWhen: (previous, current) =>
+          current.status == AmbientStatus.loaded &&
+          current.message != null &&
+          current.message != previous.message,
+      listener: (context, state) =>
+          ToastUtils.showError(context.l10n.errorMessage(state.message!)),
       builder: (context, state) {
         final active = state.activeSounds;
         return Container(
@@ -351,8 +365,10 @@ class _AmbienceStrip extends StatelessWidget {
                   Expanded(
                     child: Text(
                       active.isEmpty
-                          ? 'Nature sounds'
-                          : active.map((s) => s.name).join(' + '),
+                          ? context.l10n.natureSounds
+                          : active
+                                .map((s) => s.localizedName(context.l10n))
+                                .join(' + '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
@@ -364,7 +380,7 @@ class _AmbienceStrip extends StatelessWidget {
                   TextButton.icon(
                     onPressed: () => AmbientMixerSheet.show(context),
                     icon: const Icon(Icons.tune_rounded, size: 18),
-                    label: const Text('Mixer'),
+                    label: Text(context.l10n.mixer),
                     style: TextButton.styleFrom(
                       visualDensity: VisualDensity.compact,
                     ),
@@ -386,6 +402,7 @@ class _AmbienceStrip extends StatelessWidget {
                             child: AmbientSoundButton(
                               sound: sound,
                               isActive: state.isActive(sound.id),
+                              isLoading: state.isLoading(sound.id),
                               size: 40,
                             ),
                           );
@@ -452,7 +469,7 @@ class _Artwork extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        'SURAH ${surah.number}',
+                        context.l10n.surahNumberLabel(surah.number),
                         style: TextStyle(
                           fontSize: math.max(9, size * 0.035),
                           letterSpacing: 2,

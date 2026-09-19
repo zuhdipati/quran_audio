@@ -11,6 +11,10 @@ import 'package:quran_audio/features/prayer_time/presentation/bloc/calendar/cale
 import 'package:quran_audio/features/prayer_time/presentation/bloc/prayer_time/prayer_time_bloc.dart';
 import 'package:quran_audio/features/prayer_time/presentation/widgets/location_chip.dart';
 import 'package:quran_audio/features/prayer_time/presentation/widgets/prayer_scene.dart';
+import 'package:intl/intl.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/features/prayer_time/presentation/prayer_l10n.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -46,14 +50,18 @@ class _CalendarPageState extends State<CalendarPage> {
       listenWhen: (previous, current) => previous.location != current.location,
       listener: (context, state) => _startIfReady(state.location),
       child: NightScaffold(
-        title: 'Prayer Calendar',
+        title: context.l10n.prayerCalendarTitle,
         body: BlocBuilder<CalendarBloc, CalendarState>(
           builder: (context, state) {
             if (state.status == CalendarStatus.initial) {
               return const LoadingView();
             }
             if (state.status == CalendarStatus.error) {
-              return MessageView(message: state.message ?? 'Error');
+              return MessageView(
+                message: context.l10n.errorMessage(
+                  state.message ?? ErrorKeys.unexpected,
+                ),
+              );
             }
             return ListView(
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
@@ -86,13 +94,15 @@ class _MonthHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final schedules = state.schedules;
+    final l10n = context.l10n;
     String hijriRange = '';
     if (schedules.isNotEmpty) {
       final first = schedules.first.hijri;
       final last = schedules.last.hijri;
       hijriRange = first.month == last.month
-          ? '${first.monthName} ${first.year} H'
-          : '${first.monthName} – ${last.monthName} ${last.year} H';
+          ? '${l10n.hijriMonthName(first.month)} ${first.year} H'
+          : '${l10n.hijriMonthName(first.month)} – '
+                '${l10n.hijriMonthName(last.month)} ${last.year} H';
     }
 
     return Row(
@@ -161,7 +171,14 @@ class _MonthGrid extends StatelessWidget {
 
   const _MonthGrid({required this.state});
 
-  static const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  /// Monday-first to match `leadingBlanks`. Built from intl so the labels
+  /// follow the active language; 1 January 2024 was a Monday.
+  static List<String> _weekdayLabels() {
+    final format = DateFormat.E();
+    return [
+      for (var i = 0; i < 7; i++) format.format(DateTime(2024, 1, 1 + i)),
+    ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -175,7 +192,7 @@ class _MonthGrid extends StatelessWidget {
         children: [
           Row(
             children: [
-              for (final day in _weekdays)
+              for (final (index, day) in _weekdayLabels().indexed)
                 Expanded(
                   child: Center(
                     child: Text(
@@ -183,7 +200,8 @@ class _MonthGrid extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
-                        color: day == 'Fri'
+                        // by position, not label: "Fri" is "Jum" in Indonesian
+                        color: index == DateTime.friday - 1
                             ? AppColors.primary
                             : AppColors.textMuted,
                       ),
@@ -306,7 +324,11 @@ class _DaySchedule extends StatelessWidget {
           ),
           const SizedBox(height: 2),
           Text(
-            schedule.hijri.formatted,
+            context.l10n.hijriDate(
+              schedule.hijri.day,
+              schedule.hijri.month,
+              schedule.hijri.year,
+            ),
             style: const TextStyle(fontSize: 13, color: AppColors.primary),
           ),
           const SizedBox(height: 8),
@@ -349,7 +371,7 @@ class _TimeRow extends StatelessWidget {
           const SizedBox(width: 12),
           Expanded(
             child: Text(
-              prayer.label,
+              prayer.localized(context.l10n),
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: isMinor ? FontWeight.w500 : FontWeight.w600,
@@ -360,11 +382,11 @@ class _TimeRow extends StatelessWidget {
             ),
           ),
           if (isUpcoming)
-            const Padding(
-              padding: EdgeInsets.only(right: 10),
+            Padding(
+              padding: const EdgeInsets.only(right: 10),
               child: Text(
-                'Next',
-                style: TextStyle(
+                context.l10n.next,
+                style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w700,
                   color: AppColors.primary,

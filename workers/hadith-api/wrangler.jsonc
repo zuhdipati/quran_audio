@@ -1,0 +1,17 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "imaan-hadith-api",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-01",
+  // served only from the custom domain, where the edge cache applies
+  "workers_dev": false,
+  "routes": [{ "pattern": "hadith.zuhdipati.cloud", "custom_domain": true }],
+  "observability": { "enabled": true },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "imaan-hadith",
+      "database_id": "4a3d6a11-43bd-49b8-a2da-fa29de06c5a9"
+    }
+  ]
+}

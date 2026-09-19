@@ -16,6 +16,7 @@ import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_li
 import 'package:quran_audio/features/quran/presentation/widgets/edition_bottom_sheet.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/qori_avatar.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/surah_tile.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 class SurahPage extends StatelessWidget {
   const SurahPage({super.key});
@@ -75,10 +76,12 @@ class _SurahPageViewState extends State<SurahPageView> {
   }
 
   void _showEditionSelector(BuildContext context) async {
+    // resolved before the await: the context may be gone by the time it lands
+    final offlineMessage = context.l10n.qoriOffline;
     bool hasConnection = await InternetConnection().hasInternetAccess;
 
     if (!hasConnection) {
-      ToastUtils.showError('Qori selection is disabled while offline');
+      ToastUtils.showError(offlineMessage);
       return;
     }
 
@@ -128,7 +131,7 @@ class _SurahPageViewState extends State<SurahPageView> {
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 12, 20, 8),
             child: SearchField(
-              hintText: 'Search surah…',
+              hintText: context.l10n.searchSurah,
               onChanged: (query) {
                 context.read<SurahListBloc>().add(SearchSurahs(query));
               },
@@ -141,7 +144,7 @@ class _SurahPageViewState extends State<SurahPageView> {
                   return const LoadingView();
                 } else if (state is SurahListLoaded) {
                   if (state.filteredSurahs.isEmpty) {
-                    return const MessageView(message: 'No surahs found.');
+                    return MessageView(message: context.l10n.noSurahsFound);
                   }
                   return ListView.separated(
                     padding: const EdgeInsets.only(bottom: 32),
@@ -157,12 +160,11 @@ class _SurahPageViewState extends State<SurahPageView> {
                       final tile = SurahTile(
                         surah: surah,
                         onTap: () async {
+                          final offlineMessage = context.l10n.audioOffline;
                           bool hasConnection =
                               await InternetConnection().hasInternetAccess;
                           if (!hasConnection) {
-                            ToastUtils.showError(
-                              'Audio playback is disabled while offline',
-                            );
+                            ToastUtils.showError(offlineMessage);
                             return;
                           }
                           if (context.mounted) {
@@ -187,8 +189,8 @@ class _SurahPageViewState extends State<SurahPageView> {
                   );
                 } else if (state is SurahListError) {
                   return MessageView(
-                    message: state.message,
-                    actionLabel: 'Try again',
+                    message: context.l10n.errorMessage(state.message),
+                    actionLabel: context.l10n.tryAgain,
                     onAction: () => context.read<SurahListBloc>().add(
                       const FetchSurahs(_defaultEdition),
                     ),
@@ -213,7 +215,7 @@ class _QoriSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = edition?.englishName ?? 'Select qori';
+    final name = edition?.englishName ?? context.l10n.selectQori;
     return SurfaceCard(
       onTap: onTap,
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -225,9 +227,9 @@ class _QoriSelector extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(
-                  'RECITED BY',
-                  style: TextStyle(
+                Text(
+                  context.l10n.recitedBy,
+                  style: const TextStyle(
                     fontSize: 10,
                     letterSpacing: 0.8,
                     fontWeight: FontWeight.w700,
@@ -247,9 +249,9 @@ class _QoriSelector extends StatelessWidget {
               ],
             ),
           ),
-          const Text(
-            'Change',
-            style: TextStyle(
+          Text(
+            context.l10n.change,
+            style: const TextStyle(
               fontSize: 13,
               fontWeight: FontWeight.w600,
               color: AppColors.primary,

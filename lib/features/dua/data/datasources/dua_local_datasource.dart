@@ -2,6 +2,7 @@ import 'package:quran_audio/core/error/exception.dart';
 import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/core/utils/asset_json_loader.dart';
 import 'package:quran_audio/features/dua/data/models/dua_model.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 const String duasAsset = 'assets/data/duas.json';
 
@@ -24,7 +25,7 @@ class DuaLocalDataSourceImpl implements DuaLocalDataSource {
       return _cache = data.map((e) => DuaModel.fromJson(e)).toList();
     } catch (e, stackTrace) {
       AppLogger.e('Failed to load duas', error: e, stackTrace: stackTrace);
-      throw GeneralException(message: 'Failed to load duas');
+      throw GeneralException(message: ErrorKeys.loadDuas);
     }
   }
 }

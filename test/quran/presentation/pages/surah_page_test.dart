@@ -11,6 +11,7 @@ import 'package:quran_audio/features/quran/presentation/bloc/surah_list/surah_li
 import 'package:quran_audio/features/quran/presentation/pages/surah_page.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/edition_bottom_sheet.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/surah_tile.dart';
+import '../../../helpers/localized_app.dart';
 
 class MockEditionBloc extends MockBloc<EditionEvent, EditionState>
     implements EditionBloc {}
@@ -61,7 +62,7 @@ void main() {
         BlocProvider<EditionBloc>.value(value: mockEditionBloc),
         BlocProvider<SurahListBloc>.value(value: mockSurahListBloc),
       ],
-      child: MaterialApp(home: Scaffold(body: body)),
+      child: localizedApp(home: Scaffold(body: body)),
     );
   }
 

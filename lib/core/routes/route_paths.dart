@@ -13,4 +13,5 @@ class RoutePaths {
   static const hadith = '/hadith';
   static const hadithDetail = '/hadith/detail';
   static const salah = '/salah';
+  static const settings = '/settings';
 }

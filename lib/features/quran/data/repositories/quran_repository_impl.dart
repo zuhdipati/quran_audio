@@ -8,6 +8,7 @@ import 'package:quran_audio/features/quran/data/models/edition_model.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 import 'package:quran_audio/features/quran/domain/repositories/quran_repository.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class QuranRepositoryImpl implements QuranRepository {
   final QuranRemoteDataSource remoteDataSource;
@@ -36,7 +37,7 @@ class QuranRepositoryImpl implements QuranRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 
@@ -67,12 +68,12 @@ class QuranRepositoryImpl implements QuranRepository {
             return Right(cachedResult.map((e) => e.toEntity()).toList());
           }
         }
-        return Left(Failure('No Internet Connection'));
+        return Left(Failure(ErrorKeys.noInternet));
       }
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 
@@ -87,7 +88,7 @@ class QuranRepositoryImpl implements QuranRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 }

@@ -4,6 +4,7 @@ import 'package:quran_audio/core/error/failure.dart';
 import 'package:quran_audio/features/dua/data/datasources/dua_local_datasource.dart';
 import 'package:quran_audio/features/dua/domain/entities/dua_entity.dart';
 import 'package:quran_audio/features/dua/domain/repositories/dua_repository.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class DuaRepositoryImpl implements DuaRepository {
   final DuaLocalDataSource localDataSource;
@@ -18,7 +19,7 @@ class DuaRepositoryImpl implements DuaRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 
@@ -28,7 +29,7 @@ class DuaRepositoryImpl implements DuaRepository {
       final duas = await localDataSource.getDuas();
       final daily = duas.where((e) => e.daily).toList();
       final pool = daily.isEmpty ? duas : daily;
-      if (pool.isEmpty) return Left(Failure('No dua available'));
+      if (pool.isEmpty) return Left(Failure(ErrorKeys.noDua));
 
       final dayIndex = DateTime.utc(
         date.year,
@@ -39,7 +40,7 @@ class DuaRepositoryImpl implements DuaRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 }

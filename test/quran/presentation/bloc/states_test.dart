@@ -11,7 +11,7 @@ void main() {
     revelationType: 'Meccan',
     numberOfAyahs: 7,
   );
-  
+
   const tSurah2 = SurahEntity(
     number: 2,
     name: 'Al-Baqarah',
@@ -24,7 +24,16 @@ void main() {
   group('PlayerState', () {
     test('props should be correct', () {
       const state = PlayerState();
-      expect(state.props, [PlayerStatus.initial, null, '', [], Duration.zero, Duration.zero, '', 1.0]);
+      expect(state.props, [
+        PlayerStatus.initial,
+        null,
+        '',
+        [],
+        Duration.zero,
+        Duration.zero,
+        '',
+        1.0,
+      ]);
     });
 
     test('copyWith should return updated state', () {
@@ -61,11 +70,8 @@ void main() {
       );
       expect(state2.hasPreviousSurah, true);
       expect(state2.hasNextSurah, false);
-      
-      const state3 = PlayerState(
-        currentSurah: tSurah1,
-        surahList: [],
-      );
+
+      const state3 = PlayerState(currentSurah: tSurah1, surahList: []);
       expect(state3.hasPreviousSurah, false);
       expect(state3.hasNextSurah, false);
     });

@@ -5,6 +5,7 @@ import 'package:quran_audio/core/const/endpoints.dart';
 import 'package:quran_audio/core/error/exception.dart';
 import 'package:quran_audio/features/quran/data/models/edition_model.dart';
 import 'package:quran_audio/features/quran/data/models/surah_model.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 abstract class QuranRemoteDataSource {
   Future<List<EditionModel>> getAllEdition();
@@ -43,7 +44,7 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         }
 
         if (bitrateDir == null) {
-          throw GeneralException(message: 'No audio editions found');
+          throw GeneralException(message: ErrorKeys.noAudioEditions);
         }
 
         final editionDirs = bitrateDir['contents'] as List<dynamic>;
@@ -70,18 +71,18 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
 
         return editions;
       } else {
-        throw GeneralException(message: 'Failed to load editions');
+        throw GeneralException(message: ErrorKeys.loadEditions);
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        throw GeneralException(message: 'Request timed out. Please try again.');
+        throw GeneralException(message: ErrorKeys.timeout);
       } else if (e.type == DioExceptionType.badResponse) {
         AppLogger.e('Server error: ${e.response?.statusCode}', error: e);
-        throw GeneralException(message: 'Server error occurred');
+        throw GeneralException(message: ErrorKeys.serverError);
       }
       AppLogger.e('Network error occurred in getAllEdition', error: e);
-      throw GeneralException(message: 'Network error occurred');
+      throw GeneralException(message: ErrorKeys.network);
     } catch (e, stackTrace) {
       if (e is GeneralException) rethrow;
       AppLogger.e(
@@ -89,7 +90,7 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         error: e,
         stackTrace: stackTrace,
       );
-      throw GeneralException(message: 'An unexpected error occurred');
+      throw GeneralException(message: ErrorKeys.unexpected);
     }
   }
 
@@ -137,18 +138,18 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
           (data['data']['surahs'] as List).map((x) => SurahModel.fromJson(x)),
         );
       } else {
-        throw GeneralException(message: 'Failed to load surahs');
+        throw GeneralException(message: ErrorKeys.loadSurahs);
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        throw GeneralException(message: 'Request timed out. Please try again.');
+        throw GeneralException(message: ErrorKeys.timeout);
       } else if (e.type == DioExceptionType.badResponse) {
         AppLogger.e('Server error: ${e.response?.statusCode}', error: e);
-        throw GeneralException(message: 'Server error occurred');
+        throw GeneralException(message: ErrorKeys.serverError);
       }
       AppLogger.e('Network error occurred in getAllSurah', error: e);
-      throw GeneralException(message: 'Network error occurred');
+      throw GeneralException(message: ErrorKeys.network);
     } catch (e, stackTrace) {
       if (e is GeneralException) rethrow;
       AppLogger.e(
@@ -156,7 +157,7 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         error: e,
         stackTrace: stackTrace,
       );
-      throw GeneralException(message: 'An unexpected error occurred');
+      throw GeneralException(message: ErrorKeys.unexpected);
     }
   }
 
@@ -176,18 +177,18 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         final Map<String, dynamic> data = response.data;
         return SurahModel.fromJson(data['data']);
       } else {
-        throw GeneralException(message: 'Failed to load surah');
+        throw GeneralException(message: ErrorKeys.loadSurah);
       }
     } on DioException catch (e) {
       if (e.type == DioExceptionType.connectionTimeout ||
           e.type == DioExceptionType.receiveTimeout) {
-        throw GeneralException(message: 'Request timed out. Please try again.');
+        throw GeneralException(message: ErrorKeys.timeout);
       } else if (e.type == DioExceptionType.badResponse) {
         AppLogger.e('Server error: ${e.response?.statusCode}', error: e);
-        throw GeneralException(message: 'Server error occurred');
+        throw GeneralException(message: ErrorKeys.serverError);
       }
       AppLogger.e('Network error occurred in getSurah', error: e);
-      throw GeneralException(message: 'Network error occurred');
+      throw GeneralException(message: ErrorKeys.network);
     } catch (e, stackTrace) {
       if (e is GeneralException) rethrow;
       AppLogger.e(
@@ -195,7 +196,7 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
         error: e,
         stackTrace: stackTrace,
       );
-      throw GeneralException(message: 'An unexpected error occurred');
+      throw GeneralException(message: ErrorKeys.unexpected);
     }
   }
 }

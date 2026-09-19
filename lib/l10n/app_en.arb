@@ -1,0 +1,315 @@
+{
+  "@@locale": "en",
+  "appTitle": "Quran Audio",
+  "tryAgain": "Try again",
+  "next": "Next",
+  "change": "Change",
+  "reset": "Reset",
+  "copy": "Copy",
+  "seeAll": "See all",
+  "all": "All",
+  "source": "Source",
+  "loading": "Loading…",
+  "today": "Today",
+  "tomorrow": "Tomorrow",
+  "inDays": "in {days} days",
+  "@inDays": {
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
+  },
+  "inDuration": "in {duration}",
+  "startingNow": "now",
+  "@inDuration": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "durationMinutes": "{minutes}m",
+  "@durationMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHoursMinutes": "{hours}h {minutes}m",
+  "@durationHoursMinutes": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "String"
+      }
+    }
+  },
+  "indonesianTranslationNote": "Translation in Bahasa Indonesia",
+  "backOnline": "You're back online",
+  "errorMessage": "{key, select, unexpected{An unexpected error occurred} serverError{The server ran into a problem} timeout{The request timed out. Please try again.} network{A network error occurred} noInternet{No internet connection} loadHadiths{Couldn't load hadith} loadHadithCollections{Couldn't load hadith collections} searchHadith{Couldn't search hadith} noHadithCollections{No hadith collections available} locationUnavailable{Unable to determine your location} locationServiceOff{Location services are turned off} locationPermissionDenied{Location permission was denied} calculatePrayerTimes{Couldn't calculate prayer times} loadIslamicEvents{Couldn't load Islamic events} hijriOutOfRange{That Hijri date is outside the supported range} loadDuas{Couldn't load duas} noDua{No dua available} loadDzikir{Couldn't load dzikir} loadSalahGuide{Couldn't load the salah guide} loadEditions{Couldn't load reciters} noAudioEditions{No reciters found} loadSurahs{Couldn't load surahs} loadSurah{Couldn't load this surah} loadAudio{Couldn't load audio} loadNatureSounds{Couldn't load nature sounds} playSound{Couldn't play that sound} other{Something went wrong}}",
+  "@errorMessage": {
+    "placeholders": {
+      "key": {
+        "type": "String"
+      }
+    }
+  },
+  "featureQuran": "Quran",
+  "featureHijri": "Hijri",
+  "featureQibla": "Qibla",
+  "featureTasbeeh": "Tasbeeh",
+  "featureCalendar": "Calendar",
+  "featureDua": "Dua",
+  "featureHadith": "Hadith",
+  "featureSalah": "Salah",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "greetingNight": "Blessed night",
+  "nextPrayer": "NEXT PRAYER",
+  "unableToLoadPrayerTimes": "Unable to load prayer times",
+  "dailyDua": "Daily Dua",
+  "prayerName": "{prayer, select, imsak{Imsak} fajr{Fajr} sunrise{Sunrise} dhuhr{Dhuhr} asr{Asr} maghrib{Maghrib} isha{Isha} other{}}",
+  "@prayerName": {
+    "placeholders": {
+      "prayer": {
+        "type": "String"
+      }
+    }
+  },
+  "hijriMonth": "{month, select, m1{Muharram} m2{Safar} m3{Rabi' al-Awwal} m4{Rabi' al-Thani} m5{Jumada al-Awwal} m6{Jumada al-Thani} m7{Rajab} m8{Sha'ban} m9{Ramadan} m10{Shawwal} m11{Dhu al-Qi'dah} m12{Dhu al-Hijjah} other{}}",
+  "hijriMonthShort": "{month, select, m1{MUH} m2{SAF} m3{RAW} m4{RTH} m5{JAW} m6{JTH} m7{RAJ} m8{SHA} m9{RAM} m10{SHW} m11{DHQ} m12{DHH} other{}}",
+  "@hijriMonth": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "@hijriMonthShort": {
+    "placeholders": {
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "hijriCalendarTitle": "Hijri Calendar",
+  "upcomingIslamicDays": "Upcoming Islamic days",
+  "prayerCalendarTitle": "Prayer Calendar",
+  "locating": "Locating…",
+  "setLocation": "{city} · set location",
+  "@setLocation": {
+    "placeholders": {
+      "city": {
+        "type": "String"
+      }
+    }
+  },
+  "qiblaTitle": "Qibla",
+  "qiblaFromTrueNorth": "Qibla is {degrees}° from true north",
+  "@qiblaFromTrueNorth": {
+    "placeholders": {
+      "degrees": {
+        "type": "String"
+      }
+    }
+  },
+  "degreesFromNorth": "{degrees}° from North",
+  "@degreesFromNorth": {
+    "placeholders": {
+      "degrees": {
+        "type": "int"
+      }
+    }
+  },
+  "noCompassHint": "No compass sensor detected. Face north, then turn clockwise by this angle.",
+  "calibrating": "Calibrating…",
+  "calibrateHint": "Move your phone in a figure-eight to calibrate the compass.",
+  "facingQibla": "You are facing the Qibla",
+  "holdSteadyHint": "Hold your phone flat and steady.",
+  "turnRight": "Turn right {degrees}°",
+  "@turnRight": {
+    "placeholders": {
+      "degrees": {
+        "type": "int"
+      }
+    }
+  },
+  "turnLeft": "Turn left {degrees}°",
+  "@turnLeft": {
+    "placeholders": {
+      "degrees": {
+        "type": "int"
+      }
+    }
+  },
+  "keepFlatHint": "Keep your phone flat, away from metal objects.",
+  "tasbeehTitle": "Tasbeeh",
+  "tapToCount": "Tap the circle to count",
+  "roundsCompleted": "{rounds} × {target} completed",
+  "@roundsCompleted": {
+    "placeholders": {
+      "rounds": {
+        "type": "int"
+      },
+      "target": {
+        "type": "int"
+      }
+    }
+  },
+  "countSemantics": "Count, {count}",
+  "@countSemantics": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "salahGuideTitle": "Salah Guide",
+  "salahReadings": "Readings",
+  "salahIntention": "Intention",
+  "rakaatCount": "{count} rak'ahs",
+  "@rakaatCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "duaTitle": "Dua",
+  "searchDua": "Search dua…",
+  "noDuasFound": "No duas found.",
+  "duaCopied": "Dua copied",
+  "hadithTitle": "Hadith",
+  "unableToLoadHadith": "Unable to load hadith",
+  "searchHadithHint": "Search hadith or type its number…",
+  "searchScopeAll": "All collections",
+  "hadithRange": "Hadith {from}–{to} of {total}",
+  "@hadithRange": {
+    "placeholders": {
+      "from": {
+        "type": "String"
+      },
+      "to": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "hadithResultCount": "{count} results",
+  "@hadithResultCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "pageOf": "Page {page} of {total}",
+  "@pageOf": {
+    "placeholders": {
+      "page": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  },
+  "goToPage": "Go to page",
+  "noHadithFound": "No hadith found.",
+  "hadithCount": "{count} hadith",
+  "@hadithCount": {
+    "placeholders": {
+      "count": {
+        "type": "String"
+      }
+    }
+  },
+  "chooseNarrator": "Choose a narrator",
+  "narratorLabel": "NARRATOR",
+  "hadithNumbered": "Hadith {number}",
+  "@hadithNumbered": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "hadithNumberedLong": "Hadith No. {number}",
+  "@hadithNumberedLong": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "searchSurah": "Search surah…",
+  "noSurahsFound": "No surahs found.",
+  "qoriOffline": "Qori selection is disabled while offline",
+  "audioOffline": "Audio playback is disabled while offline",
+  "selectQori": "Select qori",
+  "recitedBy": "RECITED BY",
+  "chooseQori": "Choose a Qori",
+  "searchQori": "Search qori…",
+  "noQoriFound": "No qori found.",
+  "ayahCount": "{count} ayahs",
+  "@ayahCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "revelationType": "{type, select, Meccan{Meccan} Medinan{Medinan} other{{type}}}",
+  "@revelationType": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "nowPlaying": "Now Playing",
+  "surahNamed": "Surah {name}",
+  "@surahNamed": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "surahNumberLabel": "SURAH {number}",
+  "@surahNumberLabel": {
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
+  },
+  "natureSounds": "Nature sounds",
+  "mixer": "Mixer",
+  "soundMixer": "Sound mixer",
+  "turnOffAll": "Turn off all",
+  "layerNatureSoundsHint": "Layer nature sounds under the recitation.",
+  "recitation": "Recitation",
+  "selectSoundHint": "Select a sound above to adjust its level.",
+  "wikimediaCredit": "Recordings from Wikimedia Commons: {credits}.",
+  "@wikimediaCredit": {
+    "placeholders": {
+      "credits": {
+        "type": "String"
+      }
+    }
+  },
+  "settingsTitle": "Settings",
+  "language": "Language",
+  "languageSystem": "Use device language",
+  "languageEnglish": "English",
+  "languageIndonesian": "Bahasa Indonesia",
+  "languageContentHint": "Hadith, dua, dzikir and the salah guide are translated in Bahasa Indonesia, whichever language you choose."
+}

@@ -19,6 +19,18 @@ class GetHadithPage {
 
   Future<Either<Failure, HadithPageEntity>> call(
     HadithCollectionEntity collection,
-    int chunk,
-  ) => repository.getPage(collection, chunk);
+    int page,
+  ) => repository.getPage(collection, page);
+}
+
+class SearchHadith {
+  final HadithRepository repository;
+
+  SearchHadith(this.repository);
+
+  Future<Either<Failure, HadithPageEntity>> call(
+    String query, {
+    HadithCollectionEntity? collection,
+    required int page,
+  }) => repository.search(query, collection: collection, page: page);
 }

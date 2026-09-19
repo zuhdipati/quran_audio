@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/routes/route_paths.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/date_time_utils.dart';
 import 'package:quran_audio/core/utils/toast_utils.dart';
@@ -9,8 +12,8 @@ import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/daily_dua/daily_dua_bloc.dart';
 import 'package:quran_audio/features/home/presentation/widgets/daily_dua_card.dart';
 import 'package:quran_audio/features/home/presentation/widgets/feature_menu.dart';
-import 'package:quran_audio/features/prayer_time/domain/entities/prayer_schedule_entity.dart';
 import 'package:quran_audio/features/prayer_time/presentation/bloc/prayer_time/prayer_time_bloc.dart';
+import 'package:quran_audio/features/prayer_time/presentation/prayer_l10n.dart';
 import 'package:quran_audio/features/prayer_time/presentation/widgets/location_chip.dart';
 import 'package:quran_audio/features/prayer_time/presentation/widgets/prayer_times_strip.dart';
 
@@ -40,7 +43,8 @@ class _HomePageState extends State<HomePage> {
     return BlocListener<PrayerTimeBloc, PrayerTimeState>(
       listenWhen: (previous, current) =>
           current.message != null && previous.message != current.message,
-      listener: (context, state) => ToastUtils.showError(state.message!),
+      listener: (context, state) =>
+          ToastUtils.showError(context.l10n.errorMessage(state.message!)),
       child: NightScaffold(
         showAppBar: false,
         body: RefreshIndicator(
@@ -71,13 +75,14 @@ class _HomePageState extends State<HomePage> {
 class _Header extends StatelessWidget {
   const _Header();
 
-  String _greeting(DateTime now) {
+  // the buckets line up with pagi / siang / sore / malam
+  String _greeting(DateTime now, AppLocalizations l10n) {
     final hour = now.hour;
-    if (hour < 4) return 'Blessed night';
-    if (hour < 11) return 'Good morning';
-    if (hour < 15) return 'Good afternoon';
-    if (hour < 18) return 'Good evening';
-    return 'Blessed night';
+    if (hour < 4) return l10n.greetingNight;
+    if (hour < 11) return l10n.greetingMorning;
+    if (hour < 15) return l10n.greetingAfternoon;
+    if (hour < 18) return l10n.greetingEvening;
+    return l10n.greetingNight;
   }
 
   @override
@@ -86,6 +91,8 @@ class _Header extends StatelessWidget {
       buildWhen: (p, c) => p.today != c.today,
       builder: (context, state) {
         final now = DateTime.now();
+        final l10n = context.l10n;
+        final hijri = state.today?.hijri;
         return Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -103,7 +110,7 @@ class _Header extends StatelessWidget {
                   ),
                   const SizedBox(height: 2),
                   Text(
-                    _greeting(now),
+                    _greeting(now, l10n),
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w700,
@@ -112,9 +119,10 @@ class _Header extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    state.today == null
+                    hijri == null
                         ? DateTimeUtils.fullDate(now)
-                        : '${DateTimeUtils.fullDate(now)}\n${state.today!.hijri.formatted}',
+                        : '${DateTimeUtils.fullDate(now)}\n'
+                              '${l10n.hijriDate(hijri.day, hijri.month, hijri.year)}',
                     style: const TextStyle(
                       fontSize: 13,
                       height: 1.45,
@@ -124,9 +132,21 @@ class _Header extends StatelessWidget {
                 ],
               ),
             ),
-            const Padding(
-              padding: EdgeInsets.only(top: 4),
-              child: LocationChip(),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                IconButton(
+                  tooltip: l10n.settingsTitle,
+                  visualDensity: VisualDensity.compact,
+                  icon: const Icon(
+                    Icons.settings_outlined,
+                    size: 22,
+                    color: AppColors.textSecondary,
+                  ),
+                  onPressed: () => context.push(RoutePaths.settings),
+                ),
+                const LocationChip(),
+              ],
             ),
           ],
         );
@@ -150,7 +170,9 @@ class _PrayerOverview extends StatelessWidget {
               child: Center(
                 child: state.status == PrayerTimeStatus.error
                     ? Text(
-                        state.message ?? 'Unable to load prayer times',
+                        state.message == null
+                            ? context.l10n.unableToLoadPrayerTimes
+                            : context.l10n.errorMessage(state.message!),
                         style: const TextStyle(color: AppColors.textSecondary),
                       )
                     : const LoadingView(),
@@ -188,9 +210,9 @@ class _NextPrayer extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text(
-                'NEXT PRAYER',
-                style: TextStyle(
+              Text(
+                context.l10n.nextPrayer,
+                style: const TextStyle(
                   fontSize: 11,
                   letterSpacing: 1.2,
                   fontWeight: FontWeight.w700,
@@ -199,7 +221,7 @@ class _NextPrayer extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                next.prayer.label,
+                next.prayer.localized(context.l10n),
                 style: const TextStyle(
                   fontSize: 30,
                   height: 1.1,
@@ -225,7 +247,7 @@ class _NextPrayer extends StatelessWidget {
             ),
             const SizedBox(height: 2),
             Text(
-              'in ${DateTimeUtils.countdown(next.time.difference(now))}',
+              DateTimeUtils.countdown(next.time.difference(now), context.l10n),
               style: const TextStyle(
                 fontSize: 13,
                 color: AppColors.textSecondary,

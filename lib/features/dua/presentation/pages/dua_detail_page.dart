@@ -6,6 +6,8 @@ import 'package:quran_audio/core/widgets/night_scaffold.dart';
 import 'package:quran_audio/core/widgets/reading_block.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/dua/domain/entities/dua_entity.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/widgets/translation_language_note.dart';
 
 class DuaDetailPage extends StatelessWidget {
   final DuaEntity dua;
@@ -18,16 +20,18 @@ class DuaDetailPage extends StatelessWidget {
       title: dua.group,
       actions: [
         IconButton(
-          tooltip: 'Copy',
+          tooltip: context.l10n.copy,
           icon: const Icon(Icons.copy_rounded, size: 20),
           onPressed: () async {
+            // resolved before the await, while the context is still valid
+            final copied = context.l10n.duaCopied;
             await Clipboard.setData(
               ClipboardData(
                 text:
                     '${dua.title}\n\n${dua.arabic}\n\n${dua.latin}\n\n${dua.translation}\n\n${dua.source}',
               ),
             );
-            ToastUtils.showSuccess('Dua copied');
+            ToastUtils.showSuccess(copied);
           },
         ),
       ],
@@ -53,11 +57,12 @@ class DuaDetailPage extends StatelessWidget {
               arabicSize: 28,
             ),
           ),
+          const TranslationLanguageNote(padding: EdgeInsets.only(top: 10)),
           if (dua.source.isNotEmpty) ...[
             const SizedBox(height: 20),
-            const Text(
-              'Source',
-              style: TextStyle(
+            Text(
+              context.l10n.source,
+              style: const TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
                 color: AppColors.textSecondary,

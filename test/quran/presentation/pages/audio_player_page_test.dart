@@ -10,6 +10,7 @@ import 'package:quran_audio/features/quran/presentation/bloc/player/player_bloc.
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_event.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
 import 'package:quran_audio/features/quran/presentation/pages/audio_player_page.dart';
+import '../../../helpers/localized_app.dart';
 
 class MockPlayerBloc extends MockBloc<PlayerEvent, PlayerState>
     implements PlayerBloc {}
@@ -64,7 +65,7 @@ void main() {
         BlocProvider<PlayerBloc>.value(value: mockPlayerBloc),
         BlocProvider<AmbientBloc>.value(value: mockAmbientBloc),
       ],
-      child: MaterialApp(home: body),
+      child: localizedApp(home: body),
     );
   }
 

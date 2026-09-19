@@ -9,6 +9,9 @@ class AmbientState extends Equatable {
   final List<AmbientSoundEntity> sounds;
   final Set<String> activeIds;
 
+  /// Active sounds whose recording is still downloading.
+  final Set<String> loadingIds;
+
   /// Remembered per sound, also while the sound is switched off.
   final Map<String, double> volumes;
   final String? message;
@@ -17,6 +20,7 @@ class AmbientState extends Equatable {
     this.status = AmbientStatus.initial,
     this.sounds = const [],
     this.activeIds = const {},
+    this.loadingIds = const {},
     this.volumes = const {},
     this.message,
   });
@@ -24,6 +28,8 @@ class AmbientState extends Equatable {
   double volumeOf(String id) => volumes[id] ?? defaultVolume;
 
   bool isActive(String id) => activeIds.contains(id);
+
+  bool isLoading(String id) => loadingIds.contains(id);
 
   AmbientSoundEntity? soundById(String id) {
     for (final sound in sounds) {
@@ -39,6 +45,7 @@ class AmbientState extends Equatable {
     AmbientStatus? status,
     List<AmbientSoundEntity>? sounds,
     Set<String>? activeIds,
+    Set<String>? loadingIds,
     Map<String, double>? volumes,
     String? message,
   }) {
@@ -46,11 +53,19 @@ class AmbientState extends Equatable {
       status: status ?? this.status,
       sounds: sounds ?? this.sounds,
       activeIds: activeIds ?? this.activeIds,
+      loadingIds: loadingIds ?? this.loadingIds,
       volumes: volumes ?? this.volumes,
       message: message,
     );
   }
 
   @override
-  List<Object?> get props => [status, sounds, activeIds, volumes, message];
+  List<Object?> get props => [
+    status,
+    sounds,
+    activeIds,
+    loadingIds,
+    volumes,
+    message,
+  ];
 }

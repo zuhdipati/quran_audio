@@ -3,6 +3,8 @@ import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/date_time_utils.dart';
 import 'package:quran_audio/features/prayer_time/domain/entities/prayer_schedule_entity.dart';
 import 'package:quran_audio/features/prayer_time/presentation/widgets/prayer_scene.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/features/prayer_time/presentation/prayer_l10n.dart';
 
 /// Five daily prayers side by side, the upcoming one ringed in gold.
 class PrayerTimesStrip extends StatelessWidget {
@@ -48,7 +50,7 @@ class _PrayerColumn extends StatelessWidget {
         return Column(
           children: [
             Text(
-              prayer.label,
+              prayer.localized(context.l10n),
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,

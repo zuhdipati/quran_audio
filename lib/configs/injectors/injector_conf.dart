@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:dio/dio.dart';
 import 'package:get_it/get_it.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:hive/hive.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
 import 'package:quran_audio/configs/adapters/adapter_conf.dart';
@@ -12,7 +15,6 @@ import 'package:quran_audio/features/dua/domain/usecases/get_daily_dua.dart';
 import 'package:quran_audio/features/dua/domain/usecases/get_duas.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/daily_dua/daily_dua_bloc.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/dua/dua_bloc.dart';
-import 'package:quran_audio/features/hadith/data/datasources/hadith_local_datasource.dart';
 import 'package:quran_audio/features/hadith/data/datasources/hadith_remote_datasource.dart';
 import 'package:quran_audio/features/hadith/data/repositories/hadith_repository_impl.dart';
 import 'package:quran_audio/features/hadith/domain/repositories/hadith_repository.dart';
@@ -41,6 +43,7 @@ import 'package:quran_audio/features/qibla/domain/repositories/qibla_repository.
 import 'package:quran_audio/features/qibla/domain/usecases/watch_compass_heading.dart';
 import 'package:quran_audio/features/qibla/presentation/bloc/qibla_bloc.dart';
 import 'package:quran_audio/features/quran/data/datasources/ambient_sound_datasource.dart';
+import 'package:quran_audio/features/quran/data/datasources/ambient_sound_file_datasource.dart';
 import 'package:quran_audio/features/quran/data/datasources/local_datasource.dart';
 import 'package:quran_audio/features/quran/data/datasources/remote_datasource.dart';
 import 'package:quran_audio/features/quran/data/repositories/ambient_sound_repository_impl.dart';
@@ -93,6 +96,14 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerLazySingleton<AmbientSoundDataSource>(
     () => AmbientSoundDataSourceImpl(loader: sl()),
   );
+  sl.registerLazySingleton<AmbientSoundFileDataSource>(
+    () => AmbientSoundFileDataSourceImpl(
+      dio: sl(),
+      directory: () async => Directory(
+        '${(await getApplicationSupportDirectory()).path}/ambient_sounds',
+      ),
+    ),
+  );
   sl.registerLazySingleton<HijriLocalDataSource>(
     () => HijriLocalDataSourceImpl(loader: sl()),
   );
@@ -108,12 +119,6 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerLazySingleton<CompassDataSource>(() => CompassDataSourceImpl());
   sl.registerLazySingleton<DuaLocalDataSource>(
     () => DuaLocalDataSourceImpl(loader: sl()),
-  );
-  sl.registerLazySingleton<HadithLocalDataSource>(
-    () => HadithLocalDataSourceImpl(
-      loader: sl(),
-      box: sl<Box>(instanceName: appBox),
-    ),
   );
   sl.registerLazySingleton<HadithRemoteDataSource>(
     () => HadithRemoteDataSourceImpl(dio: sl()),
@@ -137,7 +142,7 @@ Future<void> configureDependencies(GetIt sl) async {
     ),
   );
   sl.registerLazySingleton<AmbientSoundRepository>(
-    () => AmbientSoundRepositoryImpl(dataSource: sl()),
+    () => AmbientSoundRepositoryImpl(dataSource: sl(), fileDataSource: sl()),
   );
   sl.registerLazySingleton<HijriRepository>(
     () => HijriRepositoryImpl(localDataSource: sl()),
@@ -157,7 +162,7 @@ Future<void> configureDependencies(GetIt sl) async {
     () => DuaRepositoryImpl(localDataSource: sl()),
   );
   sl.registerLazySingleton<HadithRepository>(
-    () => HadithRepositoryImpl(localDataSource: sl(), remoteDataSource: sl()),
+    () => HadithRepositoryImpl(remoteDataSource: sl()),
   );
   sl.registerLazySingleton<TasbeehRepository>(
     () => TasbeehRepositoryImpl(localDataSource: sl()),
@@ -171,6 +176,7 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerLazySingleton(() => GetAllSurah(sl<QuranRepository>()));
   sl.registerLazySingleton(() => GetSurah(sl<QuranRepository>()));
   sl.registerLazySingleton(() => GetAmbientSounds(sl()));
+  sl.registerLazySingleton(() => GetAmbientSoundFile(sl()));
   sl.registerLazySingleton(() => ConvertToHijri(sl()));
   sl.registerLazySingleton(() => GetHijriMonth(sl()));
   sl.registerLazySingleton(() => GetUpcomingEvents(sl()));
@@ -182,6 +188,7 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerLazySingleton(() => GetDailyDua(sl()));
   sl.registerLazySingleton(() => GetHadithCollections(sl()));
   sl.registerLazySingleton(() => GetHadithPage(sl()));
+  sl.registerLazySingleton(() => SearchHadith(sl()));
   sl.registerLazySingleton(() => GetDzikirList(sl()));
   sl.registerLazySingleton(() => GetTasbeehCounts(sl()));
   sl.registerLazySingleton(() => SaveTasbeehCount(sl()));
@@ -191,7 +198,9 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerFactory(() => EditionBloc(getAllEdition: sl<GetAllEdition>()));
   sl.registerFactory(() => SurahListBloc(getAllSurah: sl<GetAllSurah>()));
   sl.registerFactory(() => PlayerBloc());
-  sl.registerFactory(() => AmbientBloc(getAmbientSounds: sl()));
+  sl.registerFactory(
+    () => AmbientBloc(getAmbientSounds: sl(), getAmbientSoundFile: sl()),
+  );
   sl.registerFactory(
     () => PrayerTimeBloc(getLocation: sl(), getPrayerSchedules: sl()),
   );
@@ -209,7 +218,11 @@ Future<void> configureDependencies(GetIt sl) async {
   sl.registerFactory(() => DuaBloc(getDuas: sl()));
   sl.registerFactory(() => DailyDuaBloc(getDailyDua: sl()));
   sl.registerFactory(
-    () => HadithBloc(getHadithCollections: sl(), getHadithPage: sl()),
+    () => HadithBloc(
+      getHadithCollections: sl(),
+      getHadithPage: sl(),
+      searchHadith: sl(),
+    ),
   );
   sl.registerFactory(
     () => TasbeehBloc(

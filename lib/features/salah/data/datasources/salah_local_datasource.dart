@@ -2,6 +2,7 @@ import 'package:quran_audio/core/error/exception.dart';
 import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/core/utils/asset_json_loader.dart';
 import 'package:quran_audio/features/salah/data/models/salah_guide_model.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 const String salahAsset = 'assets/data/salah.json';
 
@@ -25,7 +26,7 @@ class SalahLocalDataSourceImpl implements SalahLocalDataSource {
         error: e,
         stackTrace: stackTrace,
       );
-      throw GeneralException(message: 'Failed to load salah guide');
+      throw GeneralException(message: ErrorKeys.loadSalahGuide);
     }
   }
 }

@@ -6,6 +6,7 @@ import 'package:quran_audio/core/themes/app_themes.dart';
 import 'package:quran_audio/core/utils/haptics.dart';
 import 'package:quran_audio/core/utils/arabic_number_utils.dart';
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 class SurahTile extends StatelessWidget {
   final SurahEntity surah;
@@ -56,7 +57,8 @@ class SurahTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 3),
                   Text(
-                    '${surah.englishNameTranslation} · ${surah.numberOfAyahs} ayahs',
+                    '${surah.englishNameTranslation} · '
+                    '${context.l10n.ayahCount(surah.numberOfAyahs)}',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(

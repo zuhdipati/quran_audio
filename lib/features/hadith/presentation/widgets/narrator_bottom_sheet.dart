@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/core/utils/haptics.dart';
 import 'package:quran_audio/features/hadith/domain/entities/hadith_entity.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 /// Picks which narrator's collection to read.
 class NarratorBottomSheet extends StatelessWidget {
@@ -49,11 +50,11 @@ class NarratorBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Choose a narrator',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              context.l10n.chooseNarrator,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 14),
@@ -124,7 +125,7 @@ class _NarratorTile extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       '${collection.narrator} · '
-                      '${thousands(collection.total)} hadith',
+                      '${context.l10n.hadithCount(thousands(collection.total))}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -133,15 +134,6 @@ class _NarratorTile extends StatelessWidget {
                   ],
                 ),
               ),
-              if (collection.bundled)
-                const Padding(
-                  padding: EdgeInsets.only(left: 8),
-                  child: Icon(
-                    Icons.offline_pin_outlined,
-                    size: 18,
-                    color: AppColors.textMuted,
-                  ),
-                ),
               if (selected)
                 const Padding(
                   padding: EdgeInsets.only(left: 8),

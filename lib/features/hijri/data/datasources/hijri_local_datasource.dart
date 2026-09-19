@@ -3,6 +3,7 @@ import 'package:quran_audio/core/error/exception.dart';
 import 'package:quran_audio/core/utils/asset_json_loader.dart';
 import 'package:quran_audio/features/hijri/data/models/islamic_event_model.dart';
 import 'package:quran_audio/features/hijri/domain/entities/hijri_date_entity.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 const String islamicEventsAsset = 'assets/data/islamic_events.json';
 
@@ -80,7 +81,7 @@ class HijriLocalDataSourceImpl implements HijriLocalDataSource {
       final List<dynamic> data = await loader.load(islamicEventsAsset);
       return data.map((e) => IslamicEventModel.fromJson(e)).toList();
     } catch (e) {
-      throw GeneralException(message: 'Failed to load Islamic events');
+      throw GeneralException(message: ErrorKeys.loadIslamicEvents);
     }
   }
 }

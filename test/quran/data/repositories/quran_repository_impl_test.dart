@@ -7,6 +7,7 @@ import 'package:quran_audio/features/quran/data/repositories/quran_repository_im
 
 import '../../dummy_data/dummy_objects.dart';
 import '../../helpers/test_helper.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 void main() {
   late QuranRepositoryImpl repository;
@@ -283,7 +284,7 @@ void main() {
 
           // assert
           result.fold(
-            (l) => expect(l.message, equals('No Internet Connection')),
+            (l) => expect(l.message, equals(ErrorKeys.noInternet)),
             (r) => fail('Expected failure'),
           );
         },

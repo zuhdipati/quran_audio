@@ -24,14 +24,19 @@ void main() {
   blocTest<SurahListBloc, SurahListState>(
     'should emit [SurahListLoading, SurahListLoaded] when data is gotten successfully',
     build: () {
-      when(() => mockGetAllSurah.call(tEditionEntity.identifier))
-          .thenAnswer((_) async => Right(tSurahEntityList));
+      when(
+        () => mockGetAllSurah.call(tEditionEntity.identifier),
+      ).thenAnswer((_) async => Right(tSurahEntityList));
       return surahListBloc;
     },
     act: (bloc) => bloc.add(FetchSurahs(tEditionEntity)),
     expect: () => [
       SurahListLoading(currentEdition: tEditionEntity),
-      SurahListLoaded(allSurahs: tSurahEntityList, filteredSurahs: tSurahEntityList, currentEdition: tEditionEntity),
+      SurahListLoaded(
+        allSurahs: tSurahEntityList,
+        filteredSurahs: tSurahEntityList,
+        currentEdition: tEditionEntity,
+      ),
     ],
     verify: (bloc) {
       verify(() => mockGetAllSurah.call(tEditionEntity.identifier));
@@ -41,8 +46,9 @@ void main() {
   blocTest<SurahListBloc, SurahListState>(
     'should emit [SurahListLoading, SurahListError] when getting data fails',
     build: () {
-      when(() => mockGetAllSurah.call(tEditionEntity.identifier))
-          .thenAnswer((_) async => Left(Failure('Server Failure')));
+      when(
+        () => mockGetAllSurah.call(tEditionEntity.identifier),
+      ).thenAnswer((_) async => Left(Failure('Server Failure')));
       return surahListBloc;
     },
     act: (bloc) => bloc.add(FetchSurahs(tEditionEntity)),
@@ -60,7 +66,11 @@ void main() {
     build: () {
       return surahListBloc;
     },
-    seed: () => SurahListLoaded(allSurahs: tSurahEntityList, filteredSurahs: tSurahEntityList, currentEdition: tEditionEntity),
+    seed: () => SurahListLoaded(
+      allSurahs: tSurahEntityList,
+      filteredSurahs: tSurahEntityList,
+      currentEdition: tEditionEntity,
+    ),
     act: (bloc) => bloc.add(SearchSurahs('faatiha')),
     expect: () => [],
   );
@@ -70,10 +80,18 @@ void main() {
     build: () {
       return surahListBloc;
     },
-    seed: () => SurahListLoaded(allSurahs: tSurahEntityList, filteredSurahs: tSurahEntityList, currentEdition: tEditionEntity),
+    seed: () => SurahListLoaded(
+      allSurahs: tSurahEntityList,
+      filteredSurahs: tSurahEntityList,
+      currentEdition: tEditionEntity,
+    ),
     act: (bloc) => bloc.add(SearchSurahs('nonexistent')),
     expect: () => [
-      SurahListLoaded(allSurahs: tSurahEntityList, filteredSurahs: [], currentEdition: tEditionEntity),
+      SurahListLoaded(
+        allSurahs: tSurahEntityList,
+        filteredSurahs: [],
+        currentEdition: tEditionEntity,
+      ),
     ],
   );
 }

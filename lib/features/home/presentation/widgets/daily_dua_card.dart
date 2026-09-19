@@ -7,6 +7,7 @@ import 'package:quran_audio/core/widgets/reading_block.dart';
 import 'package:quran_audio/core/widgets/section_header.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/daily_dua/daily_dua_bloc.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 class DailyDuaSection extends StatelessWidget {
   const DailyDuaSection({super.key});
@@ -17,8 +18,8 @@ class DailyDuaSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         SectionHeader(
-          title: 'Daily Dua',
-          actionLabel: 'See all',
+          title: context.l10n.dailyDua,
+          actionLabel: context.l10n.seeAll,
           onAction: () => context.push(RoutePaths.dua),
         ),
         const SizedBox(height: 12),

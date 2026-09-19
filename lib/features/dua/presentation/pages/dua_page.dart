@@ -9,6 +9,9 @@ import 'package:quran_audio/core/widgets/entrance.dart';
 import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/features/dua/presentation/bloc/dua/dua_bloc.dart';
 import 'package:quran_audio/features/dua/presentation/widgets/dua_tile.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/widgets/translation_language_note.dart';
 
 class DuaPage extends StatefulWidget {
   const DuaPage({super.key});
@@ -28,18 +31,21 @@ class _DuaPageState extends State<DuaPage> {
   @override
   Widget build(BuildContext context) {
     return NightScaffold(
-      title: 'Dua',
+      title: context.l10n.duaTitle,
       body: Column(
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
             child: SearchField(
-              hintText: 'Search dua…',
+              hintText: context.l10n.searchDua,
               onChanged: (query) =>
                   context.read<DuaBloc>().add(DuaSearchChanged(query)),
             ),
           ),
           const _GroupChips(),
+          const TranslationLanguageNote(
+            padding: EdgeInsets.fromLTRB(24, 10, 24, 0),
+          ),
           const SizedBox(height: 8),
           Expanded(
             child: BlocBuilder<DuaBloc, DuaState>(
@@ -49,10 +55,14 @@ class _DuaPageState extends State<DuaPage> {
                   case DuaStatus.loading:
                     return const LoadingView();
                   case DuaStatus.error:
-                    return MessageView(message: state.message ?? 'Error');
+                    return MessageView(
+                      message: context.l10n.errorMessage(
+                        state.message ?? ErrorKeys.unexpected,
+                      ),
+                    );
                   case DuaStatus.loaded:
                     if (state.filteredDuas.isEmpty) {
-                      return const MessageView(message: 'No duas found.');
+                      return MessageView(message: context.l10n.noDuasFound);
                     }
                     return ListView.separated(
                       padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
@@ -103,7 +113,7 @@ class _GroupChips extends StatelessWidget {
               final group = groups[index];
               final isSelected = group == state.selectedGroup;
               return ChoiceChip(
-                label: Text(group ?? 'All'),
+                label: Text(group ?? context.l10n.all),
                 selected: isSelected,
                 showCheckmark: false,
                 labelStyle: TextStyle(

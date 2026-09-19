@@ -10,6 +10,9 @@ import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/hijri/domain/entities/hijri_month_entity.dart';
 import 'package:quran_audio/features/hijri/domain/entities/islamic_event_entity.dart';
 import 'package:quran_audio/features/hijri/presentation/bloc/hijri_bloc.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/features/hijri/presentation/hijri_l10n.dart';
 
 class HijriPage extends StatefulWidget {
   const HijriPage({super.key});
@@ -31,11 +34,15 @@ class _HijriPageState extends State<HijriPage> {
   @override
   Widget build(BuildContext context) {
     return NightScaffold(
-      title: 'Hijri Calendar',
+      title: context.l10n.hijriCalendarTitle,
       body: BlocBuilder<HijriBloc, HijriState>(
         builder: (context, state) {
           if (state.status == HijriStatus.error) {
-            return MessageView(message: state.message ?? 'Error');
+            return MessageView(
+              message: context.l10n.errorMessage(
+                state.message ?? ErrorKeys.unexpected,
+              ),
+            );
           }
           if (state.status != HijriStatus.loaded) return const LoadingView();
 
@@ -46,7 +53,7 @@ class _HijriPageState extends State<HijriPage> {
               const SizedBox(height: 24),
               _HijriMonthCard(state: state),
               const SizedBox(height: 24),
-              const SectionHeader(title: 'Upcoming Islamic days'),
+              SectionHeader(title: context.l10n.upcomingIslamicDays),
               const SizedBox(height: 12),
               for (final event in state.upcomingEvents)
                 Padding(
@@ -87,7 +94,7 @@ class _TodayHero extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${today.monthName} ${today.year} H',
+          '${context.l10n.hijriMonthName(today.month)} ${today.year} H',
           style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
         ),
         const SizedBox(height: 4),
@@ -127,7 +134,8 @@ class _HijriMonthCard extends StatelessWidget {
                 child: Column(
                   children: [
                     Text(
-                      '${month.monthName} ${month.year} H',
+                      '${context.l10n.hijriMonthName(month.month)} '
+                      '${month.year} H',
                       style: const TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -182,9 +190,10 @@ class _HijriMonthCard extends StatelessWidget {
                   children: [
                     const Icon(Icons.circle, size: 6, color: AppColors.primary),
                     const SizedBox(width: 10),
-                    Expanded(child: Text(event.name)),
+                    Expanded(child: Text(event.localizedName(context.l10n))),
                     Text(
-                      '${event.hijriDay} ${month.monthName}',
+                      '${event.hijriDay} '
+                      '${context.l10n.hijriMonthName(month.month)}',
                       style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textSecondary,
@@ -272,11 +281,12 @@ class _EventTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final start = DateTime(today.year, today.month, today.day);
     final daysLeft = event.gregorian.difference(start).inDays;
+    final l10n = context.l10n;
     final countdown = daysLeft == 0
-        ? 'Today'
+        ? l10n.today
         : daysLeft == 1
-        ? 'Tomorrow'
-        : 'in $daysLeft days';
+        ? l10n.tomorrow
+        : l10n.inDays(daysLeft);
 
     return SurfaceCard(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
@@ -295,7 +305,7 @@ class _EventTile extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  hijriShortMonth(event.hijriMonth),
+                  l10n.hijriMonthShort('m${event.hijriMonth}'),
                   style: const TextStyle(
                     fontSize: 10,
                     color: AppColors.textSecondary,
@@ -310,12 +320,13 @@ class _EventTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  event.name,
+                  event.localizedName(l10n),
                   style: const TextStyle(fontWeight: FontWeight.w600),
                 ),
                 const SizedBox(height: 2),
                 Text(
-                  '${DateTimeUtils.fullDate(event.gregorian)} · ${event.description}',
+                  '${DateTimeUtils.fullDate(event.gregorian)} · '
+                  '${event.localizedDescription(l10n)}',
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -336,18 +347,3 @@ class _EventTile extends StatelessWidget {
     );
   }
 }
-
-String hijriShortMonth(int month) => const [
-  'MUH',
-  'SAF',
-  'RAW',
-  'RAK',
-  'JAW',
-  'JAK',
-  'RAJ',
-  'SYA',
-  'RAM',
-  'SYW',
-  'DZQ',
-  'DZH',
-][month - 1];

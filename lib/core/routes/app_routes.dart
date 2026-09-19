@@ -24,6 +24,7 @@ import 'package:quran_audio/features/quran/presentation/pages/audio_player_page.
 import 'package:quran_audio/features/quran/presentation/pages/surah_page.dart';
 import 'package:quran_audio/features/salah/presentation/bloc/salah_bloc.dart';
 import 'package:quran_audio/features/salah/presentation/pages/salah_page.dart';
+import 'package:quran_audio/features/settings/presentation/pages/settings_page.dart';
 import 'package:quran_audio/features/tasbeeh/presentation/bloc/tasbeeh_bloc.dart';
 import 'package:quran_audio/features/tasbeeh/presentation/pages/tasbeeh_page.dart';
 
@@ -143,6 +144,12 @@ class AppRoutes {
             child: const SalahPage(),
           ),
         ),
+      ),
+      GoRoute(
+        path: RoutePaths.settings,
+        name: 'settings',
+        pageBuilder: (context, state) =>
+            const CupertinoPage(child: SettingsPage()),
       ),
     ],
   );

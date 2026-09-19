@@ -24,14 +24,18 @@ void main() {
   blocTest<EditionBloc, EditionState>(
     'should emit [EditionLoading, EditionLoaded] when data is gotten successfully',
     build: () {
-      when(() => mockGetAllEdition.call())
-          .thenAnswer((_) async => Right(tEditionEntityList));
+      when(
+        () => mockGetAllEdition.call(),
+      ).thenAnswer((_) async => Right(tEditionEntityList));
       return editionBloc;
     },
     act: (bloc) => bloc.add(GetEditions()),
     expect: () => [
       EditionLoading(),
-      EditionLoaded(allEditions: tEditionEntityList, filteredEditions: tEditionEntityList),
+      EditionLoaded(
+        allEditions: tEditionEntityList,
+        filteredEditions: tEditionEntityList,
+      ),
     ],
     verify: (bloc) {
       verify(() => mockGetAllEdition.call());
@@ -41,15 +45,13 @@ void main() {
   blocTest<EditionBloc, EditionState>(
     'should emit [EditionLoading, EditionError] when getting data fails',
     build: () {
-      when(() => mockGetAllEdition.call())
-          .thenAnswer((_) async => Left(Failure('Server Failure')));
+      when(
+        () => mockGetAllEdition.call(),
+      ).thenAnswer((_) async => Left(Failure('Server Failure')));
       return editionBloc;
     },
     act: (bloc) => bloc.add(GetEditions()),
-    expect: () => [
-      EditionLoading(),
-      EditionError('Server Failure'),
-    ],
+    expect: () => [EditionLoading(), EditionError('Server Failure')],
     verify: (bloc) {
       verify(() => mockGetAllEdition.call());
     },
@@ -60,7 +62,10 @@ void main() {
     build: () {
       return editionBloc;
     },
-    seed: () => EditionLoaded(allEditions: tEditionEntityList, filteredEditions: tEditionEntityList),
+    seed: () => EditionLoaded(
+      allEditions: tEditionEntityList,
+      filteredEditions: tEditionEntityList,
+    ),
     act: (bloc) => bloc.add(SearchEditions('alafasy')),
     expect: () => [],
   );
@@ -70,7 +75,10 @@ void main() {
     build: () {
       return editionBloc;
     },
-    seed: () => EditionLoaded(allEditions: tEditionEntityList, filteredEditions: tEditionEntityList),
+    seed: () => EditionLoaded(
+      allEditions: tEditionEntityList,
+      filteredEditions: tEditionEntityList,
+    ),
     act: (bloc) => bloc.add(SearchEditions('nonexistent')),
     expect: () => [
       EditionLoaded(allEditions: tEditionEntityList, filteredEditions: []),

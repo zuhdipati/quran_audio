@@ -8,6 +8,9 @@ import 'package:quran_audio/features/quran/presentation/bloc/player/player_bloc.
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_event.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/ambient_sound_icon.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/features/quran/presentation/ambient_l10n.dart';
 
 /// Pick nature sounds and balance their volume against the recitation.
 class AmbientMixerSheet extends StatelessWidget {
@@ -52,7 +55,11 @@ class AmbientMixerSheet extends StatelessWidget {
             if (state.status == AmbientStatus.error) {
               return SizedBox(
                 height: 240,
-                child: MessageView(message: state.message ?? 'Error'),
+                child: MessageView(
+                  message: context.l10n.errorMessage(
+                    state.message ?? ErrorKeys.unexpected,
+                  ),
+                ),
               );
             }
 
@@ -73,10 +80,10 @@ class AmbientMixerSheet extends StatelessWidget {
                 const SizedBox(height: 18),
                 Row(
                   children: [
-                    const Expanded(
+                    Expanded(
                       child: Text(
-                        'Sound mixer',
-                        style: TextStyle(
+                        context.l10n.soundMixer,
+                        style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -86,14 +93,14 @@ class AmbientMixerSheet extends StatelessWidget {
                       TextButton(
                         onPressed: () =>
                             context.read<AmbientBloc>().add(AmbientStopped()),
-                        child: const Text('Turn off all'),
+                        child: Text(context.l10n.turnOffAll),
                       ),
                   ],
                 ),
                 const SizedBox(height: 4),
-                const Text(
-                  'Layer nature sounds under the recitation.',
-                  style: TextStyle(color: AppColors.textSecondary),
+                Text(
+                  context.l10n.layerNatureSoundsHint,
+                  style: const TextStyle(color: AppColors.textSecondary),
                 ),
                 const SizedBox(height: 18),
                 GridView.count(
@@ -108,6 +115,7 @@ class AmbientMixerSheet extends StatelessWidget {
                       AmbientSoundButton(
                         sound: sound,
                         isActive: state.isActive(sound.id),
+                        isLoading: state.isLoading(sound.id),
                       ),
                   ],
                 ),
@@ -118,7 +126,7 @@ class AmbientMixerSheet extends StatelessWidget {
                   buildWhen: (p, c) => p.volume != c.volume,
                   builder: (context, playerState) => _VolumeRow(
                     icon: Icons.menu_book_rounded,
-                    label: 'Recitation',
+                    label: context.l10n.recitation,
                     value: playerState.volume,
                     onChanged: (value) =>
                         context.read<PlayerBloc>().add(SetQuranVolume(value)),
@@ -127,18 +135,18 @@ class AmbientMixerSheet extends StatelessWidget {
                 for (final sound in state.activeSounds)
                   _VolumeRow(
                     icon: ambientSoundIcon(sound.id),
-                    label: sound.name,
+                    label: sound.localizedName(context.l10n),
                     value: state.volumeOf(sound.id),
                     onChanged: (value) => context.read<AmbientBloc>().add(
                       AmbientVolumeChanged(sound.id, value),
                     ),
                   ),
                 if (state.activeSounds.isEmpty)
-                  const Padding(
-                    padding: EdgeInsets.only(top: 8),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 8),
                     child: Text(
-                      'Select a sound above to adjust its level.',
-                      style: TextStyle(
+                      context.l10n.selectSoundHint,
+                      style: const TextStyle(
                         fontSize: 12,
                         color: AppColors.textMuted,
                       ),
@@ -146,8 +154,15 @@ class AmbientMixerSheet extends StatelessWidget {
                   ),
                 const SizedBox(height: 16),
                 Text(
-                  'Recordings from Wikimedia Commons: '
-                  '${state.sounds.map((s) => '${s.name} (${s.attribution})').join(', ')}.',
+                  context.l10n.wikimediaCredit(
+                    state.sounds
+                        .map(
+                          (s) =>
+                              '${s.localizedName(context.l10n)} '
+                              '(${s.attribution})',
+                        )
+                        .join(', '),
+                  ),
                   style: const TextStyle(
                     fontSize: 10,
                     height: 1.5,
@@ -166,12 +181,17 @@ class AmbientMixerSheet extends StatelessWidget {
 class AmbientSoundButton extends StatelessWidget {
   final AmbientSoundEntity sound;
   final bool isActive;
+
+  /// Switched on, but the recording is still downloading.
+  final bool isLoading;
+
   final double size;
 
   const AmbientSoundButton({
     super.key,
     required this.sound,
     required this.isActive,
+    this.isLoading = false,
     this.size = 52,
   });
 
@@ -194,15 +214,25 @@ class AmbientSoundButton extends StatelessWidget {
                 color: isActive ? AppColors.primary : AppColors.border,
               ),
             ),
-            child: Icon(
-              ambientSoundIcon(sound.id),
-              size: size * 0.42,
-              color: isActive ? AppColors.onPrimary : AppColors.textSecondary,
-            ),
+            child: isActive && isLoading
+                ? Padding(
+                    padding: EdgeInsets.all(size * 0.3),
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: AppColors.onPrimary,
+                    ),
+                  )
+                : Icon(
+                    ambientSoundIcon(sound.id),
+                    size: size * 0.42,
+                    color: isActive
+                        ? AppColors.onPrimary
+                        : AppColors.textSecondary,
+                  ),
           ),
           const SizedBox(height: 6),
           Text(
-            sound.name,
+            sound.localizedName(context.l10n),
             maxLines: 2,
             textAlign: TextAlign.center,
             overflow: TextOverflow.ellipsis,

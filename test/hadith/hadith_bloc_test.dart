@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc_test/bloc_test.dart';
 import 'package:dartz/dartz.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -12,263 +14,278 @@ class MockHadithRepository extends Mock implements HadithRepository {}
 
 void main() {
   late MockHadithRepository repository;
-  late GetHadithCollections getCollections;
-  late GetHadithPage getPage;
 
   const arbain = HadithCollectionEntity(
     id: 'arbain-nawawi',
     name: 'Hadits Arbain An-Nawawi',
     narrator: 'Imam An-Nawawi',
     total: 42,
-    chunkSize: 42,
-    chunks: 1,
-    bundled: true,
   );
 
   const bukhari = HadithCollectionEntity(
     id: 'shahih-bukhari',
     name: 'Shahih Bukhari',
     narrator: 'Imam Bukhari',
-    total: 300,
-    chunkSize: 100,
-    chunks: 3,
+    total: 7008,
   );
 
   const collections = [arbain, bukhari];
 
-  List<HadithEntity> page(int chunk, {int size = 100}) => List.generate(
-    size,
-    (i) => HadithEntity(
-      number: (chunk - 1) * size + i + 1,
-      arabic: 'عربي',
-      translation: 'terjemahan ${(chunk - 1) * size + i + 1}',
+  /// Page [page] of 20, numbered as the API numbers them.
+  HadithPageEntity pageOf(int page, {int total = 7008}) => HadithPageEntity(
+    page: page,
+    totalPages: (total / 20).ceil(),
+    total: total,
+    hadiths: List.generate(
+      20,
+      (i) => HadithEntity(
+        number: (page - 1) * 20 + i + 1,
+        arabic: 'عربي',
+        translation: 'terjemahan',
+      ),
     ),
   );
 
-  HadithPageEntity pageOf(String id, int chunk, {int size = 100}) =>
-      HadithPageEntity(
-        collectionId: id,
-        chunk: chunk,
-        hadiths: page(chunk, size: size),
-      );
+  const results = HadithPageEntity(
+    page: 1,
+    totalPages: 1,
+    total: 1,
+    hadiths: [
+      HadithEntity(
+        number: 1203,
+        arabic: 'عربي',
+        translation: 'Sesungguhnya sabar itu',
+        source: 'Shahih Bukhari',
+        snippet: 'Sesungguhnya <mark>sabar</mark> itu',
+      ),
+    ],
+  );
 
-  setUpAll(() {
-    registerFallbackValue(arbain);
-  });
+  // past the bloc's debounce, so the search has gone out
+  const settle = Duration(milliseconds: 450);
+
+  setUpAll(() => registerFallbackValue(arbain));
 
   setUp(() {
     repository = MockHadithRepository();
-    getCollections = GetHadithCollections(repository);
-    getPage = GetHadithPage(repository);
-  });
-
-  HadithBloc build() => HadithBloc(
-    getHadithCollections: getCollections,
-    getHadithPage: getPage,
-  );
-
-  void stubCollections() {
     when(
       () => repository.getCollections(),
     ).thenAnswer((_) async => const Right(collections));
-  }
+    when(() => repository.getPage(arbain, any())).thenAnswer(
+      (i) async => Right(pageOf(i.positionalArguments[1], total: 42)),
+    );
+    when(
+      () => repository.getPage(bukhari, any()),
+    ).thenAnswer((i) async => Right(pageOf(i.positionalArguments[1])));
+    when(
+      () => repository.search(
+        any(),
+        collection: any(named: 'collection'),
+        page: any(named: 'page'),
+      ),
+    ).thenAnswer((_) async => const Right(results));
+  });
+
+  HadithBloc build() => HadithBloc(
+    getHadithCollections: GetHadithCollections(repository),
+    getHadithPage: GetHadithPage(repository),
+    searchHadith: SearchHadith(repository),
+  );
+
+  Future<void> tick() => Future<void>.delayed(Duration.zero);
 
   group('HadithsRequested', () {
     blocTest<HadithBloc, HadithState>(
-      'opens the bundled collection first so the page fills offline',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-      },
+      'opens page 1 of the first collection',
       build: build,
       act: (bloc) => bloc.add(const HadithsRequested()),
       verify: (bloc) {
         expect(bloc.state.status, HadithStatus.loaded);
         expect(bloc.state.selected, arbain);
-        expect(bloc.state.hadiths.length, 42);
-        expect(bloc.state.loadedChunks, 1);
-        expect(bloc.state.hasMore, isFalse);
+        expect(bloc.state.pageNumber, 1);
+        expect(bloc.state.page?.totalPages, 3);
       },
     );
 
     blocTest<HadithBloc, HadithState>(
-      'reports the failure when the manifest cannot be read',
+      'reports the failure when the catalogue cannot be read',
       setUp: () => when(
         () => repository.getCollections(),
-      ).thenAnswer((_) async => Left(Failure('boom'))),
+      ).thenAnswer((_) async => Left(Failure('noInternet'))),
       build: build,
       act: (bloc) => bloc.add(const HadithsRequested()),
       verify: (bloc) {
         expect(bloc.state.status, HadithStatus.error);
-        expect(bloc.state.message, 'boom');
+        expect(bloc.state.collections, isEmpty);
+        expect(bloc.state.message, 'noInternet');
+      },
+    );
+  });
+
+  group('paging', () {
+    blocTest<HadithBloc, HadithState>(
+      'jumps straight to any page',
+      build: build,
+      act: (bloc) async {
+        bloc.add(const HadithsRequested());
+        await tick();
+        bloc.add(const HadithCollectionSelected(bukhari));
+        await tick();
+        bloc.add(const HadithPageRequested(351));
+      },
+      verify: (bloc) {
+        expect(bloc.state.pageNumber, 351);
+        expect(bloc.state.page?.hadiths.first.number, 7001);
+        verifyNever(() => repository.getPage(bukhari, 2));
+      },
+    );
+
+    blocTest<HadithBloc, HadithState>(
+      'a failed page keeps the previous one for the pager and can be retried',
+      setUp: () => when(
+        () => repository.getPage(arbain, 2),
+      ).thenAnswer((_) async => Left(Failure('timeout'))),
+      build: build,
+      act: (bloc) async {
+        bloc.add(const HadithsRequested());
+        await tick();
+        bloc.add(const HadithPageRequested(2));
+      },
+      verify: (bloc) {
+        expect(bloc.state.status, HadithStatus.error);
+        expect(bloc.state.message, 'timeout');
+        expect(bloc.state.pageNumber, 2);
+        expect(bloc.state.page?.page, 1);
+      },
+    );
+
+    blocTest<HadithBloc, HadithState>(
+      'a slow page never replaces a newer one',
+      setUp: () {
+        final slow = Completer<Either<Failure, HadithPageEntity>>();
+        when(
+          () => repository.getPage(bukhari, 2),
+        ).thenAnswer((_) => slow.future);
+        // page 2 answers only after page 3 has landed
+        when(() => repository.getPage(bukhari, 3)).thenAnswer((_) async {
+          scheduleMicrotask(() => slow.complete(Right(pageOf(2))));
+          return Right(pageOf(3));
+        });
+      },
+      build: build,
+      act: (bloc) async {
+        bloc.add(const HadithsRequested());
+        await tick();
+        bloc.add(const HadithCollectionSelected(bukhari));
+        await tick();
+        bloc.add(const HadithPageRequested(2));
+        bloc.add(const HadithPageRequested(3));
+        await tick();
+      },
+      verify: (bloc) {
+        expect(bloc.state.pageNumber, 3);
+        expect(bloc.state.page?.page, 3);
       },
     );
   });
 
   group('HadithCollectionSelected', () {
     blocTest<HadithBloc, HadithState>(
-      'switching narrator resets the list and reloads from chunk one',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-        when(
-          () => repository.getPage(bukhari, 1),
-        ).thenAnswer((_) async => Right(pageOf(bukhari.id, 1)));
-      },
+      'starts the new collection at page 1',
       build: build,
       act: (bloc) async {
         bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
+        await tick();
+        bloc.add(const HadithPageRequested(2));
+        await tick();
         bloc.add(const HadithCollectionSelected(bukhari));
       },
       verify: (bloc) {
         expect(bloc.state.selected, bukhari);
-        expect(bloc.state.hadiths.length, 100);
-        expect(bloc.state.hadiths.first.number, 1);
-        expect(bloc.state.loadedChunks, 1);
-        expect(bloc.state.hasMore, isTrue);
+        expect(bloc.state.pageNumber, 1);
+        expect(bloc.state.page?.totalPages, 351);
       },
     );
 
     blocTest<HadithBloc, HadithState>(
       'reselecting the open collection does not refetch',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-      },
       build: build,
       act: (bloc) async {
         bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
+        await tick();
         bloc.add(const HadithCollectionSelected(arbain));
       },
       verify: (_) => verify(() => repository.getPage(arbain, 1)).called(1),
     );
   });
 
-  group('HadithNextPageRequested', () {
-    blocTest<HadithBloc, HadithState>(
-      'appends the next chunk in order',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-        when(
-          () => repository.getPage(bukhari, any()),
-        ).thenAnswer((invocation) async {
-          final chunk = invocation.positionalArguments[1] as int;
-          return Right(pageOf(bukhari.id, chunk));
-        });
-      },
-      build: build,
-      act: (bloc) async {
-        bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithCollectionSelected(bukhari));
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithNextPageRequested());
-      },
-      verify: (bloc) {
-        expect(bloc.state.hadiths.length, 200);
-        expect(bloc.state.hadiths.last.number, 200);
-        expect(bloc.state.loadedChunks, 2);
-        expect(bloc.state.loadingMore, isFalse);
-      },
-    );
-
-    blocTest<HadithBloc, HadithState>(
-      'stops at the end of the collection',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-      },
-      build: build,
-      act: (bloc) async {
-        bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithNextPageRequested());
-      },
-      verify: (_) => verifyNever(() => repository.getPage(arbain, 2)),
-    );
-
-    blocTest<HadithBloc, HadithState>(
-      'a failed chunk keeps what is already loaded',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-        when(
-          () => repository.getPage(bukhari, 1),
-        ).thenAnswer((_) async => Right(pageOf(bukhari.id, 1)));
-        when(
-          () => repository.getPage(bukhari, 2),
-        ).thenAnswer((_) async => Left(Failure('offline')));
-      },
-      build: build,
-      act: (bloc) async {
-        bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithCollectionSelected(bukhari));
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithNextPageRequested());
-      },
-      verify: (bloc) {
-        expect(bloc.state.hadiths.length, 100);
-        expect(bloc.state.loadedChunks, 1);
-        expect(bloc.state.loadingMore, isFalse);
-        expect(bloc.state.message, 'offline');
-        expect(bloc.state.hasMore, isTrue);
-      },
-    );
-  });
-
   group('search', () {
     blocTest<HadithBloc, HadithState>(
-      'filters only what has been loaded',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-      },
+      'searches the open collection once typing pauses',
       build: build,
       act: (bloc) async {
         bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithSearchChanged('terjemahan 7'));
+        await tick();
+        bloc.add(const HadithSearchChanged('sa'));
+        bloc.add(const HadithSearchChanged('sab'));
+        bloc.add(const HadithSearchChanged(' sabar '));
       },
+      wait: settle,
       verify: (bloc) {
-        expect(bloc.state.hadiths.length, 42);
-        expect(bloc.state.visible.map((h) => h.number), [7]);
+        expect(bloc.state.query, 'sabar');
+        expect(bloc.state.page, results);
+        verify(
+          () => repository.search('sabar', collection: arbain, page: 1),
+        ).called(1);
+        verifyNever(
+          () => repository.search(
+            'sab',
+            collection: any(named: 'collection'),
+            page: any(named: 'page'),
+          ),
+        );
       },
     );
 
     blocTest<HadithBloc, HadithState>(
-      'an empty query restores the full loaded list',
-      setUp: () {
-        stubCollections();
-        when(() => repository.getPage(arbain, 1)).thenAnswer(
-          (_) async => Right(pageOf(arbain.id, 1, size: 42)),
-        );
-      },
+      'the all-collections scope searches without a collection',
       build: build,
       act: (bloc) async {
         bloc.add(const HadithsRequested());
-        await Future<void>.delayed(Duration.zero);
-        bloc.add(const HadithSearchChanged('terjemahan 7'));
+        await tick();
+        bloc.add(const HadithSearchChanged('sabar'));
+        await Future<void>.delayed(settle);
+        bloc.add(const HadithSearchScopeChanged(searchAll: true));
+      },
+      wait: settle,
+      verify: (bloc) {
+        expect(bloc.state.searchAll, isTrue);
+        verify(
+          () => repository.search('sabar', collection: null, page: 1),
+        ).called(1);
+      },
+    );
+
+    blocTest<HadithBloc, HadithState>(
+      'clearing the query returns to the page being browsed',
+      build: build,
+      act: (bloc) async {
+        bloc.add(const HadithsRequested());
+        await tick();
+        bloc.add(const HadithCollectionSelected(bukhari));
+        await tick();
+        bloc.add(const HadithPageRequested(120));
+        await tick();
+        bloc.add(const HadithSearchChanged('sabar'));
+        await Future<void>.delayed(settle);
         bloc.add(const HadithSearchChanged(''));
       },
-      verify: (bloc) => expect(bloc.state.visible.length, 42),
+      wait: settle,
+      verify: (bloc) {
+        expect(bloc.state.searching, isFalse);
+        expect(bloc.state.pageNumber, 120);
+        expect(bloc.state.page?.hadiths.first.number, 2381);
+      },
     );
   });
 }

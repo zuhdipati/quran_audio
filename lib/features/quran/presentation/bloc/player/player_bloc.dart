@@ -5,6 +5,7 @@ import 'package:quran_audio/core/const/endpoints.dart';
 import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_event.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/player/player_state.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
   final ja.AudioPlayer _audioPlayer;
@@ -88,7 +89,7 @@ class PlayerBloc extends Bloc<PlayerEvent, PlayerState> {
       emit(
         state.copyWith(
           status: PlayerStatus.error,
-          errorMessage: 'Failed to load audio',
+          errorMessage: ErrorKeys.loadAudio,
         ),
       );
     }

@@ -7,6 +7,7 @@ import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/features/quran/domain/entities/edition_entity.dart';
 import 'package:quran_audio/features/quran/presentation/bloc/edition/edition_bloc.dart';
 import 'package:quran_audio/features/quran/presentation/widgets/qori_avatar.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 class EditionBottomSheet extends StatelessWidget {
   final EditionEntity? currentEdition;
@@ -34,16 +35,16 @@ class EditionBottomSheet extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 18),
-          const Align(
+          Align(
             alignment: Alignment.centerLeft,
             child: Text(
-              'Choose a Qori',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+              context.l10n.chooseQori,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
             ),
           ),
           const SizedBox(height: 14),
           SearchField(
-            hintText: 'Search qori…',
+            hintText: context.l10n.searchQori,
             onChanged: (query) {
               context.read<EditionBloc>().add(SearchEditions(query));
             },
@@ -56,7 +57,7 @@ class EditionBottomSheet extends StatelessWidget {
                   return const LoadingView();
                 } else if (state is EditionLoaded) {
                   if (state.filteredEditions.isEmpty) {
-                    return const MessageView(message: 'No qori found.');
+                    return MessageView(message: context.l10n.noQoriFound);
                   }
 
                   return ListView.builder(
@@ -73,7 +74,9 @@ class EditionBottomSheet extends StatelessWidget {
                     },
                   );
                 } else if (state is EditionError) {
-                  return MessageView(message: state.message);
+                  return MessageView(
+                    message: context.l10n.errorMessage(state.message),
+                  );
                 }
                 return const SizedBox.shrink();
               },

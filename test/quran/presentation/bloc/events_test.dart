@@ -14,7 +14,7 @@ void main() {
     revelationType: 'Meccan',
     numberOfAyahs: 7,
   );
-  
+
   const tEdition = EditionEntity(
     identifier: 'ar.alafasy',
     language: 'ar',
@@ -24,15 +24,32 @@ void main() {
 
   group('PlayerEvents', () {
     test('props should be correct', () {
-      expect(const LoadSurah(tSurah, editionIdentifier: 'ar.alafasy', surahList: [tSurah]).props, [tSurah, 'ar.alafasy', [tSurah]]);
+      expect(
+        const LoadSurah(
+          tSurah,
+          editionIdentifier: 'ar.alafasy',
+          surahList: [tSurah],
+        ).props,
+        [
+          tSurah,
+          'ar.alafasy',
+          [tSurah],
+        ],
+      );
       expect(PlayAudio().props, []);
       expect(PauseAudio().props, []);
       expect(ResumeAudio().props, []);
       expect(NextSurah().props, []);
       expect(PreviousSurah().props, []);
-      expect(const SeekAudio(Duration(seconds: 1)).props, [const Duration(seconds: 1)]);
-      expect(const UpdatePosition(Duration(seconds: 1)).props, [const Duration(seconds: 1)]);
-      expect(const UpdateDuration(Duration(seconds: 1)).props, [const Duration(seconds: 1)]);
+      expect(const SeekAudio(Duration(seconds: 1)).props, [
+        const Duration(seconds: 1),
+      ]);
+      expect(const UpdatePosition(Duration(seconds: 1)).props, [
+        const Duration(seconds: 1),
+      ]);
+      expect(const UpdateDuration(Duration(seconds: 1)).props, [
+        const Duration(seconds: 1),
+      ]);
       expect(AudioCompleted().props, []);
       expect(StopAudio().props, []);
     });

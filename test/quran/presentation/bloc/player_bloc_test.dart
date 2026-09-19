@@ -8,6 +8,7 @@ import 'package:quran_audio/features/quran/presentation/bloc/player/player_state
 import 'package:quran_audio/features/quran/domain/entities/surah_entity.dart';
 
 import '../../helpers/test_helper.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class FakeUri extends Fake implements Uri {}
 
@@ -212,7 +213,7 @@ void main() {
         currentSurah: tSurah1,
         editionIdentifier: tEdition,
         surahList: tSurahList,
-        errorMessage: 'Failed to load audio',
+        errorMessage: ErrorKeys.loadAudio,
       ),
     ],
   );

@@ -17,7 +17,7 @@ void main() {
         "englishName": "Alafasy",
         "format": "audio",
         "type": "versebyverse",
-        "direction": null
+        "direction": null,
       };
 
       final result = EditionModel.fromJson(jsonMap);
@@ -46,7 +46,7 @@ void main() {
         "englishName": "Alafasy",
         "format": "audio",
         "type": "versebyverse",
-        "direction": null
+        "direction": null,
       };
 
       expect(result, equals(expectedMap));

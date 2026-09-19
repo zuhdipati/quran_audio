@@ -5,6 +5,7 @@ import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/features/tasbeeh/data/datasources/tasbeeh_local_datasource.dart';
 import 'package:quran_audio/features/tasbeeh/domain/entities/dzikir_entity.dart';
 import 'package:quran_audio/features/tasbeeh/domain/repositories/tasbeeh_repository.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class TasbeehRepositoryImpl implements TasbeehRepository {
   final TasbeehLocalDataSource localDataSource;
@@ -19,7 +20,7 @@ class TasbeehRepositoryImpl implements TasbeehRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 

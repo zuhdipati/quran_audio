@@ -4,20 +4,24 @@ import 'package:just_audio/just_audio.dart' as ja;
 import 'package:quran_audio/core/utils/app_logger.dart';
 import 'package:quran_audio/features/quran/domain/entities/ambient_sound_entity.dart';
 import 'package:quran_audio/features/quran/domain/usecases/get_ambient_sounds.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 part 'ambient_event.dart';
 part 'ambient_state.dart';
 
 /// Mixes looping nature sounds underneath the recitation. Every active sound
-/// has its own player so each can have an independent volume.
+/// has its own player so each can have an independent volume. A sound's
+/// recording is downloaded the first time it is switched on.
 class AmbientBloc extends Bloc<AmbientEvent, AmbientState> {
   final GetAmbientSounds getAmbientSounds;
+  final GetAmbientSoundFile getAmbientSoundFile;
   final ja.AudioPlayer Function() _playerFactory;
 
   final Map<String, ja.AudioPlayer> _players = {};
 
   AmbientBloc({
     required this.getAmbientSounds,
+    required this.getAmbientSoundFile,
     ja.AudioPlayer Function()? playerFactory,
   }) : _playerFactory = playerFactory ?? ja.AudioPlayer.new,
        super(const AmbientState()) {
@@ -56,18 +60,42 @@ class AmbientBloc extends Bloc<AmbientEvent, AmbientState> {
     final sound = state.soundById(id);
     if (sound == null) return;
 
-    emit(state.copyWith(activeIds: {...state.activeIds, id}));
+    emit(
+      state.copyWith(
+        activeIds: {...state.activeIds, id},
+        loadingIds: {...state.loadingIds, id},
+      ),
+    );
+
+    final file = await getAmbientSoundFile(sound);
+    final path = file.fold((failure) => null, (path) => path);
+    if (path == null) {
+      emit(
+        state.copyWith(
+          activeIds: {...state.activeIds}..remove(id),
+          loadingIds: {...state.loadingIds}..remove(id),
+          message: file.fold((failure) => failure.message, (_) => null),
+        ),
+      );
+      return;
+    }
+    emit(state.copyWith(loadingIds: {...state.loadingIds}..remove(id)));
+
+    // switched off while downloading, or already started by a second tap
+    // that waited on the same download
+    if (!state.isActive(id) || _players.containsKey(id)) return;
+
     try {
       final player = _playerFactory();
       _players[id] = player;
-      await player.setAsset(sound.asset);
+      await player.setFilePath(path);
       await player.setLoopMode(ja.LoopMode.one);
       await player.setVolume(state.volumeOf(id));
       // play() completes only when playback stops, so don't await it
       player.play();
     } catch (e, stackTrace) {
       AppLogger.e(
-        'Failed to play ${sound.asset}',
+        'Failed to play ${sound.file}',
         error: e,
         stackTrace: stackTrace,
       );
@@ -75,7 +103,7 @@ class AmbientBloc extends Bloc<AmbientEvent, AmbientState> {
       emit(
         state.copyWith(
           activeIds: {...state.activeIds}..remove(id),
-          message: 'Unable to play ${sound.name}',
+          message: ErrorKeys.playSound,
         ),
       );
     }

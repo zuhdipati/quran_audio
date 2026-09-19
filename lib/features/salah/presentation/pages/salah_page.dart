@@ -7,6 +7,8 @@ import 'package:quran_audio/core/widgets/state_views.dart';
 import 'package:quran_audio/core/widgets/surface_card.dart';
 import 'package:quran_audio/features/salah/domain/entities/salah_guide_entity.dart';
 import 'package:quran_audio/features/salah/presentation/bloc/salah_bloc.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
+import 'package:quran_audio/core/widgets/translation_language_note.dart';
 
 class SalahPage extends StatefulWidget {
   const SalahPage({super.key});
@@ -28,21 +30,29 @@ class _SalahPageState extends State<SalahPage> {
   @override
   Widget build(BuildContext context) {
     return NightScaffold(
-      title: 'Salah Guide',
+      title: context.l10n.salahGuideTitle,
       body: BlocBuilder<SalahBloc, SalahState>(
         builder: (context, state) {
           return switch (state) {
             SalahInitial() || SalahLoading() => const LoadingView(),
-            SalahError(:final message) => MessageView(message: message),
+            SalahError(:final message) => MessageView(
+              message: context.l10n.errorMessage(message),
+            ),
             SalahLoaded(:final guide) => Column(
               children: [
                 Padding(
                   padding: const EdgeInsets.fromLTRB(20, 8, 20, 12),
                   child: _SegmentedTabs(
-                    labels: const ['Readings', 'Niat'],
+                    labels: [
+                      context.l10n.salahReadings,
+                      context.l10n.salahIntention,
+                    ],
                     selected: _tab,
                     onChanged: (index) => setState(() => _tab = index),
                   ),
+                ),
+                const TranslationLanguageNote(
+                  padding: EdgeInsets.fromLTRB(24, 0, 24, 10),
                 ),
                 Expanded(
                   child: _tab == 0
@@ -252,7 +262,7 @@ class _NiatList extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    '${item.rakaat} rakaat',
+                    context.l10n.rakaatCount(item.rakaat),
                     style: const TextStyle(
                       fontSize: 12,
                       color: AppColors.textSecondary,

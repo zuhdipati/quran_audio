@@ -4,6 +4,7 @@ import 'package:quran_audio/core/error/failure.dart';
 import 'package:quran_audio/features/salah/data/datasources/salah_local_datasource.dart';
 import 'package:quran_audio/features/salah/domain/entities/salah_guide_entity.dart';
 import 'package:quran_audio/features/salah/domain/repositories/salah_repository.dart';
+import 'package:quran_audio/core/error/error_keys.dart';
 
 class SalahRepositoryImpl implements SalahRepository {
   final SalahLocalDataSource localDataSource;
@@ -18,7 +19,7 @@ class SalahRepositoryImpl implements SalahRepository {
     } on GeneralException catch (e) {
       return Left(Failure(e.message));
     } catch (e) {
-      return Left(Failure('An unexpected error occurred'));
+      return Left(Failure(ErrorKeys.unexpected));
     }
   }
 }

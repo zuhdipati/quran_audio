@@ -14,6 +14,7 @@ class MockDio extends Mock implements Dio {}
 
 // Data Source Mocks
 class MockQuranRemoteDataSource extends Mock implements QuranRemoteDataSource {}
+
 class MockQuranLocalDataSource extends Mock implements QuranLocalDataSource {}
 
 // Repository Mocks
@@ -21,7 +22,9 @@ class MockQuranRepository extends Mock implements QuranRepository {}
 
 // UseCase Mocks
 class MockGetAllEdition extends Mock implements GetAllEdition {}
+
 class MockGetAllSurah extends Mock implements GetAllSurah {}
+
 class MockGetSurah extends Mock implements GetSurah {}
 
 // Network Mocks

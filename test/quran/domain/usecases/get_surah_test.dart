@@ -20,8 +20,9 @@ void main() {
 
   test('should get a surah detail from the repository', () async {
     // arrange
-    when(() => mockQuranRepository.getSurah(tSurahNumber, tEdition))
-        .thenAnswer((_) async => Right(tSurahEntity));
+    when(
+      () => mockQuranRepository.getSurah(tSurahNumber, tEdition),
+    ).thenAnswer((_) async => Right(tSurahEntity));
 
     // act
     final result = await usecase.call(tSurahNumber, tEdition);

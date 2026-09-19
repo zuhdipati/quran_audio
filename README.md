@@ -43,7 +43,7 @@ This project strictly adheres to **Clean Architecture** principles and uses **BL
 4. **Prayer times, Qibla and Hijri dates** are calculated on device with [adhan](https://pub.dev/packages/adhan) and [hijri](https://pub.dev/packages/hijri).
 
 ### Nature Sound Credits
-Recordings in `assets/sounds` come from Wikimedia Commons: Rain and Rain & Thunder by ezwa (public domain), Rain on Window by cori (public domain), Light Rainfall by Mijesty (CC BY-SA 4.0), Stream by jackthemurray (CC0), Waterfall by Benzband (CC BY-SA 3.0), Birdsong by Robert EA Harvey (CC BY-SA 4.0), Ocean Waves by Luftrum (CC BY 3.0), Forest Wind by W.carter (CC BY-SA 4.0), Night Chorus by JogiAsad (CC BY-SA 4.0). Source links are listed in `assets/data/ambient_sounds.json`.
+The ambient recordings (served from the R2 bucket `imaan` under `sounds/`, downloaded on first use) come from Wikimedia Commons: Rain and Rain & Thunder by ezwa (public domain), Rain on Window by cori (public domain), Light Rainfall by Mijesty (CC BY-SA 4.0), Stream by jackthemurray (CC0), Waterfall by Benzband (CC BY-SA 3.0), Birdsong by Robert EA Harvey (CC BY-SA 4.0), Ocean Waves by Luftrum (CC BY 3.0), Forest Wind by W.carter (CC BY-SA 4.0), Night Chorus by JogiAsad (CC BY-SA 4.0). Source links are listed in `assets/data/ambient_sounds.json`.
 
 <img width="390" height="844" alt="Simulator Screenshot - iPhone 16e - 2026-05-31 at 03 37 00" src="https://github.com/user-attachments/assets/ae115542-5a68-4314-9abb-1b92c919c14b" />
 <img width="390" height="844" alt="Simulator Screenshot - iPhone 16e - 2026-05-31 at 03 37 12" src="https://github.com/user-attachments/assets/9710ef7c-e64d-409d-94e1-5e6726edf112" />

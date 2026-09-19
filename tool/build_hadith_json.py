@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Convert the hadits-database SQL dumps into chunked JSON for R2.
+"""Convert the hadits-database SQL dumps into chunked JSON, the input for
+tool/build_hadith_d1.py.
 
 Source: https://github.com/irsyadulibad/hadits-database (MIT; translations
 originate from carihadis.com).
@@ -9,12 +10,14 @@ Usage:
     python3 tool/build_hadith_json.py hadits-database build/hadith
 
 Writes:
-    <out>/imaan/hadith/<slug>/<nnn>.json   chunked hadiths
-    <out>/imaan/hadith/index.json          manifest served from R2
-    assets/data/hadith_index.json          manifest bundled in the app
+    <out>/hadith/<slug>/<nnn>.json   chunked hadiths
+    <out>/hadith/index.json          manifest: names, order and totals
 
-Upload the contents of <out> to the R2 bucket root so keys land under
-"imaan/hadith/".
+Arbain An-Nawawi is not in the dump; it comes from tool/data/arbain_nawawi.json
+and is written as a single chunk ahead of the rest.
+
+Then turn it into SQL for the hadith API's D1 database:
+    python3 tool/build_hadith_d1.py <out>/hadith <out>/d1
 """
 
 import html
@@ -23,8 +26,8 @@ import os
 import re
 import sys
 
-# chunks are sized per collection to land near this, so a scroll fetches a
-# predictable amount over mobile data
+# chunks are sized per collection to land near this, keeping every file
+# small enough to open and inspect
 TARGET_CHUNK_BYTES = 320 * 1024
 MIN_CHUNK, MAX_CHUNK = 10, 200
 
@@ -44,16 +47,10 @@ COLLECTIONS = [
     ("riyadhus-shalihin-arab", "Riyadhus Shalihin (Arab)", "Imam An-Nawawi"),
 ]
 
-# Arbain ships inside the app so the screen is never empty offline
-BUNDLED = {
-    "id": "arbain-nawawi",
-    "name": "Hadits Arbain An-Nawawi",
-    "narrator": "Imam An-Nawawi",
-    "total": 42,
-    "chunkSize": 42,
-    "chunks": 1,
-    "bundled": True,
-}
+# curated separately, with titles; the app opens it first because it is the
+# smallest collection and a single fetch
+ARBAIN_SOURCE = os.path.join(os.path.dirname(__file__), "data", "arbain_nawawi.json")
+ARBAIN = ("arbain-nawawi", "Hadits Arbain An-Nawawi", "Imam An-Nawawi")
 
 _ESCAPES = {"n": "\n", "r": "\r", "t": "\t", "0": "", "b": "", "Z": ""}
 
@@ -141,10 +138,32 @@ def chunk_size_for(hadiths) -> int:
     return max(MIN_CHUNK, min(MAX_CHUNK, int(TARGET_CHUNK_BYTES / estimated)))
 
 
+def write_arbain(root: str) -> dict:
+    """Write Arbain as one chunk and return its manifest entry."""
+    slug, name, narrator = ARBAIN
+    with open(ARBAIN_SOURCE, encoding="utf-8") as fh:
+        hadiths = json.load(fh)["hadiths"]
+
+    chunk_dir = os.path.join(root, slug)
+    os.makedirs(chunk_dir, exist_ok=True)
+    with open(os.path.join(chunk_dir, "001.json"), "w", encoding="utf-8") as fh:
+        json.dump(hadiths, fh, ensure_ascii=False, separators=(",", ":"))
+
+    print(f"  {name:28} {len(hadiths):6,} hadiths    1 chunks")
+    return {
+        "id": slug,
+        "name": name,
+        "narrator": narrator,
+        "total": len(hadiths),
+        "chunkSize": len(hadiths),
+        "chunks": 1,
+    }
+
+
 def build(src_dir: str, out_dir: str) -> None:
-    root = os.path.join(out_dir, "imaan", "hadith")
+    root = os.path.join(out_dir, "hadith")
     os.makedirs(root, exist_ok=True)
-    index = []
+    index = [write_arbain(root)]
 
     for slug, name, narrator in COLLECTIONS:
         path = os.path.join(src_dir, f"{slug}.sql")
@@ -206,20 +225,8 @@ def build(src_dir: str, out_dir: str) -> None:
         )
         print(f"  {name:28} {len(hadiths):6,} hadiths  {chunks:3} chunks  {size/1048576:6.1f} MB")
 
-    for entry in index:
-        entry["bundled"] = False
-
     with open(os.path.join(root, "index.json"), "w", encoding="utf-8") as fh:
         json.dump(index, fh, ensure_ascii=False, indent=2)
-
-    # the app bundles the same manifest, with Arbain first
-    assets = os.path.join("assets", "data")
-    if os.path.isdir(assets):
-        with open(
-            os.path.join(assets, "hadith_index.json"), "w", encoding="utf-8"
-        ) as fh:
-            json.dump([BUNDLED] + index, fh, ensure_ascii=False, indent=2)
-        print(f"  manifest -> {assets}/hadith_index.json")
 
     print(f"\ntotal {sum(c['total'] for c in index):,} hadiths across {len(index)} collections")
     print(f"written to {root}")

@@ -4,7 +4,9 @@ class AmbientSoundModel {
   final String id;
   final String name;
   final String subtitle;
-  final String asset;
+
+  /// Name of the recording in the R2 bucket, see `urlAmbientSound`.
+  final String file;
   final String attribution;
   final String source;
 
@@ -12,7 +14,7 @@ class AmbientSoundModel {
     required this.id,
     required this.name,
     required this.subtitle,
-    required this.asset,
+    required this.file,
     required this.attribution,
     required this.source,
   });
@@ -22,7 +24,7 @@ class AmbientSoundModel {
         id: json['id'] ?? '',
         name: json['name'] ?? '',
         subtitle: json['subtitle'] ?? '',
-        asset: json['asset'] ?? '',
+        file: json['file'] ?? '',
         attribution: json['attribution'] ?? '',
         source: json['source'] ?? '',
       );
@@ -31,7 +33,7 @@ class AmbientSoundModel {
     'id': id,
     'name': name,
     'subtitle': subtitle,
-    'asset': asset,
+    'file': file,
     'attribution': attribution,
     'source': source,
   };
@@ -40,7 +42,7 @@ class AmbientSoundModel {
     id: id,
     name: name,
     subtitle: subtitle,
-    asset: asset,
+    file: file,
     attribution: attribution,
   );
 }

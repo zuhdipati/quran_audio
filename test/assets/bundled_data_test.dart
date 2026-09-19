@@ -1,9 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:quran_audio/core/utils/asset_json_loader.dart';
 import 'package:quran_audio/features/dua/data/datasources/dua_local_datasource.dart';
-import 'package:quran_audio/features/hadith/data/datasources/hadith_local_datasource.dart';
 import 'package:quran_audio/features/hijri/data/datasources/hijri_local_datasource.dart';
 import 'package:quran_audio/features/quran/data/datasources/ambient_sound_datasource.dart';
 import 'package:quran_audio/features/salah/data/datasources/salah_local_datasource.dart';
@@ -26,60 +23,6 @@ void main() {
     expect(duas.map((d) => d.id).toSet().length, equals(duas.length));
   });
 
-  test('hadith collection contains all 42 arbain hadith in order', () async {
-    final hadiths = await HadithLocalDataSourceImpl(
-      loader: loader,
-    ).getBundledHadiths();
-
-    expect(hadiths.length, equals(42));
-    expect(
-      hadiths.map((h) => h.number).toList(),
-      equals(List.generate(42, (i) => i + 1)),
-    );
-    for (final hadith in hadiths) {
-      expect(hadith.arabic, contains(arabicLetter));
-      expect(hadith.translation, isNotEmpty);
-    }
-  });
-
-  test('hadith manifest is complete and self-consistent', () async {
-    final collections = await HadithLocalDataSourceImpl(
-      loader: loader,
-    ).getCollections();
-
-    expect(collections, isNotEmpty);
-    // the bundled collection must come first so the page fills offline
-    expect(collections.first.bundled, isTrue);
-    expect(collections.where((c) => c.bundled).length, equals(1));
-
-    final ids = collections.map((c) => c.id).toSet();
-    expect(ids.length, equals(collections.length), reason: 'duplicate ids');
-
-    for (final collection in collections) {
-      expect(collection.id, isNotEmpty);
-      expect(collection.name, isNotEmpty);
-      expect(collection.narrator, isNotEmpty);
-      expect(collection.total, greaterThan(0));
-      expect(collection.chunkSize, greaterThan(0));
-      // chunk count must cover every hadith, or the tail is unreachable
-      expect(
-        collection.chunks,
-        equals((collection.total / collection.chunkSize).ceil()),
-        reason: '${collection.id} chunk count does not cover its total',
-      );
-    }
-  });
-
-  test('bundled arbain fits in a single manifest chunk', () async {
-    final source = HadithLocalDataSourceImpl(loader: loader);
-    final arbain = (await source.getCollections()).firstWhere((c) => c.bundled);
-    final hadiths = await source.getBundledHadiths();
-
-    expect(arbain.total, equals(hadiths.length));
-    expect(arbain.chunks, equals(1));
-    expect(arbain.toEntity().chunkFor(hadiths.last.number), equals(1));
-  });
-
   test('salah guide has niat for five prayers and ordered steps', () async {
     final guide = await SalahLocalDataSourceImpl(loader: loader).getGuide();
 
@@ -94,15 +37,21 @@ void main() {
     }
   });
 
-  test('every ambient sound points to a bundled mp3', () async {
+  test('every ambient sound names its own mp3 in R2', () async {
     final sounds = await AmbientSoundDataSourceImpl(
       loader: loader,
     ).getAmbientSounds();
 
     expect(sounds.length, greaterThanOrEqualTo(8));
+    // the file name is the cache key on the device, so two sounds sharing
+    // one would play each other's recording
+    expect(sounds.map((s) => s.file).toSet().length, sounds.length);
     for (final sound in sounds) {
-      expect(File(sound.asset).existsSync(), isTrue, reason: sound.asset);
+      expect(sound.file, matches(RegExp(r'^[\w-]+\.mp3$')), reason: sound.id);
       expect(sound.attribution, isNotEmpty);
+      // name is Indonesian, subtitle its English; both are shown by language
+      expect(sound.name, isNotEmpty, reason: '${sound.id} has no name');
+      expect(sound.subtitle, isNotEmpty, reason: '${sound.id} has no subtitle');
     }
   });
 
@@ -113,6 +62,13 @@ void main() {
     for (final event in events) {
       expect(event.month, inInclusiveRange(1, 12));
       expect(event.day, inInclusiveRange(1, 30));
+      // the UI falls back to Indonesian silently, so catch gaps here instead
+      expect(event.nameEn, isNotEmpty, reason: '${event.name} has no nameEn');
+      expect(
+        event.descriptionEn,
+        isNotEmpty,
+        reason: '${event.name} has no descriptionEn',
+      );
     }
   });
 

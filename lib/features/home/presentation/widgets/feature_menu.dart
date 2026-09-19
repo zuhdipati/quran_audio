@@ -3,9 +3,11 @@ import 'package:go_router/go_router.dart';
 import 'package:quran_audio/core/routes/route_paths.dart';
 import 'package:quran_audio/core/themes/app_colors.dart';
 import 'package:quran_audio/features/home/presentation/widgets/menu_icons.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 class _MenuItem {
-  final String label;
+  /// Resolved at build time: this list is top-level, so it has no context.
+  final String Function(AppLocalizations l10n) label;
   final String route;
   final Widget Function(Color color) icon;
 
@@ -14,34 +16,42 @@ class _MenuItem {
 
 final _items = <_MenuItem>[
   _MenuItem(
-    'Quran',
+    (l) => l.featureQuran,
     RoutePaths.quran,
     (c) => Icon(Icons.menu_book_rounded, color: c, size: 26),
   ),
   _MenuItem(
-    'Hijri',
+    (l) => l.featureHijri,
     RoutePaths.hijri,
     (c) => Icon(Icons.brightness_3_rounded, color: c, size: 24),
   ),
   _MenuItem(
-    'Qibla',
+    (l) => l.featureQibla,
     RoutePaths.qibla,
     (c) => Icon(Icons.explore_rounded, color: c, size: 26),
   ),
-  _MenuItem('Tasbeeh', RoutePaths.tasbeeh, (c) => TasbeehGlyph(color: c)),
   _MenuItem(
-    'Calendar',
+    (l) => l.featureTasbeeh,
+    RoutePaths.tasbeeh,
+    (c) => TasbeehGlyph(color: c),
+  ),
+  _MenuItem(
+    (l) => l.featureCalendar,
     RoutePaths.calendar,
     (c) => Icon(Icons.calendar_month_rounded, color: c, size: 26),
   ),
-  _MenuItem('Dua', RoutePaths.dua, (c) => DuaGlyph(color: c, size: 30)),
   _MenuItem(
-    'Hadith',
+    (l) => l.featureDua,
+    RoutePaths.dua,
+    (c) => DuaGlyph(color: c, size: 30),
+  ),
+  _MenuItem(
+    (l) => l.featureHadith,
     RoutePaths.hadith,
     (c) => Icon(Icons.auto_stories_rounded, color: c, size: 25),
   ),
   _MenuItem(
-    'Salah',
+    (l) => l.featureSalah,
     RoutePaths.salah,
     (c) => Icon(Icons.mosque_rounded, color: c, size: 26),
   ),
@@ -81,9 +91,10 @@ class _MenuTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final label = item.label(context.l10n);
     return Semantics(
       button: true,
-      label: item.label,
+      label: label,
       child: InkWell(
         borderRadius: BorderRadius.circular(18),
         onTap: () => context.push(item.route),
@@ -103,7 +114,7 @@ class _MenuTile extends StatelessWidget {
             ),
             const SizedBox(height: 7),
             Text(
-              item.label,
+              label,
               maxLines: 1,
               overflow: TextOverflow.fade,
               softWrap: false,

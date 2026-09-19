@@ -21,11 +21,18 @@ final class HadithCollectionSelected extends HadithEvent {
   List<Object?> get props => [collection];
 }
 
-/// Pull the next chunk of the open collection.
-final class HadithNextPageRequested extends HadithEvent {
-  const HadithNextPageRequested();
+/// Show page [page] (1-based) of whatever is on screen: the collection, or
+/// the search results.
+final class HadithPageRequested extends HadithEvent {
+  final int page;
+
+  const HadithPageRequested(this.page);
+
+  @override
+  List<Object?> get props => [page];
 }
 
+/// The search field changed; debounced in the bloc.
 final class HadithSearchChanged extends HadithEvent {
   final String query;
 
@@ -33,4 +40,13 @@ final class HadithSearchChanged extends HadithEvent {
 
   @override
   List<Object?> get props => [query];
+}
+
+final class HadithSearchScopeChanged extends HadithEvent {
+  final bool searchAll;
+
+  const HadithSearchScopeChanged({required this.searchAll});
+
+  @override
+  List<Object?> get props => [searchAll];
 }

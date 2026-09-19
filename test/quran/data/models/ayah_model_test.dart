@@ -27,7 +27,7 @@ void main() {
         "page": 1,
         "ruku": 1,
         "hizbQuarter": 1,
-        "sajda": false
+        "sajda": false,
       };
 
       final result = AyahModel.fromJson(jsonMap);
@@ -49,7 +49,7 @@ void main() {
         "page": 1,
         "ruku": 1,
         "hizbQuarter": 1,
-        "sajda": null
+        "sajda": null,
       };
 
       final result = AyahModel.fromJson(jsonMap);
@@ -70,7 +70,7 @@ void main() {
         "page": 1,
         "ruku": 1,
         "hizbQuarter": 1,
-        "sajda": false
+        "sajda": false,
       };
 
       expect(result, equals(expectedMap));

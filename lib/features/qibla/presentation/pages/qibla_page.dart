@@ -9,6 +9,7 @@ import 'package:quran_audio/features/prayer_time/domain/entities/location_entity
 import 'package:quran_audio/features/prayer_time/presentation/bloc/prayer_time/prayer_time_bloc.dart';
 import 'package:quran_audio/features/prayer_time/presentation/widgets/location_chip.dart';
 import 'package:quran_audio/features/qibla/presentation/bloc/qibla_bloc.dart';
+import 'package:quran_audio/core/locale/l10n.dart';
 
 class QiblaPage extends StatefulWidget {
   const QiblaPage({super.key});
@@ -35,7 +36,7 @@ class _QiblaPageState extends State<QiblaPage> {
       listenWhen: (previous, current) => previous.location != current.location,
       listener: (context, state) => _start(state.location),
       child: NightScaffold(
-        title: 'Qibla',
+        title: context.l10n.qiblaTitle,
         body: BlocBuilder<QiblaBloc, QiblaState>(
           builder: (context, state) {
             if (state.status == QiblaStatus.initial) return const LoadingView();
@@ -51,7 +52,9 @@ class _QiblaPageState extends State<QiblaPage> {
                   _Instruction(state: state),
                   const Spacer(),
                   Text(
-                    'Qibla is ${state.qiblaDirection.toStringAsFixed(1)}° from true north',
+                    context.l10n.qiblaFromTrueNorth(
+                      state.qiblaDirection.toStringAsFixed(1),
+                    ),
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textMuted,
@@ -74,27 +77,27 @@ class _Instruction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     String title;
     String subtitle;
     switch (state.status) {
       case QiblaStatus.noSensor:
-        title = '${state.qiblaDirection.round()}° from North';
-        subtitle =
-            'No compass sensor detected. Face north, then turn clockwise by this angle.';
+        title = l10n.degreesFromNorth(state.qiblaDirection.round());
+        subtitle = l10n.noCompassHint;
       case QiblaStatus.waiting:
       case QiblaStatus.initial:
-        title = 'Calibrating…';
-        subtitle =
-            'Move your phone in a figure-eight to calibrate the compass.';
+        title = l10n.calibrating;
+        subtitle = l10n.calibrateHint;
       case QiblaStatus.tracking:
         final angle = state.turnAngle;
         if (state.isFacingQibla) {
-          title = 'You are facing the Qibla';
-          subtitle = 'Hold your phone flat and steady.';
+          title = l10n.facingQibla;
+          subtitle = l10n.holdSteadyHint;
         } else {
-          title =
-              'Turn ${angle > 0 ? 'right' : 'left'} ${angle.abs().round()}°';
-          subtitle = 'Keep your phone flat, away from metal objects.';
+          // whole sentences per direction: word order differs by language
+          final degrees = angle.abs().round();
+          title = angle > 0 ? l10n.turnRight(degrees) : l10n.turnLeft(degrees);
+          subtitle = l10n.keepFlatHint;
         }
     }
 

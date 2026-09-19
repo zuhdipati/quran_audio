@@ -16,7 +16,7 @@ void main() {
         "englishName": "Al-Faatiha",
         "englishNameTranslation": "The Opening",
         "revelationType": "Meccan",
-        "numberOfAyahs": 7
+        "numberOfAyahs": 7,
       };
 
       final result = SurahModel.fromJson(jsonMap);
@@ -37,7 +37,7 @@ void main() {
         "revelationType": "Meccan",
         "numberOfAyahs": 7,
         "ayahs": [],
-        "edition": tEditionModel.toJson()
+        "edition": tEditionModel.toJson(),
       };
 
       expect(result, equals(expectedMap));
