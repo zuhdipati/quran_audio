@@ -25,9 +25,9 @@ class TasbeehRepositoryImpl implements TasbeehRepository {
   }
 
   @override
-  Future<Map<String, int>> getCounts() async {
+  Future<Map<String, int>> getCounts(DateTime day) async {
     try {
-      return await localDataSource.getCounts();
+      return await localDataSource.getCounts(day);
     } catch (e) {
       AppLogger.w('Failed to read tasbeeh counts', error: e);
       return {};
@@ -35,9 +35,9 @@ class TasbeehRepositoryImpl implements TasbeehRepository {
   }
 
   @override
-  Future<void> saveCount(String dzikirId, int count) async {
+  Future<void> saveCount(String dzikirId, int count, DateTime day) async {
     try {
-      await localDataSource.saveCount(dzikirId, count);
+      await localDataSource.saveCount(dzikirId, count, day);
     } catch (e) {
       AppLogger.w('Failed to save tasbeeh count', error: e);
     }

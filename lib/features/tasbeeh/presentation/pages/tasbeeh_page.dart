@@ -20,11 +20,24 @@ class TasbeehPage extends StatefulWidget {
 }
 
 class _TasbeehPageState extends State<TasbeehPage> {
+  /// Catches midnight passing while the app was in the background. It is
+  /// only a callback, so it costs nothing until the app resumes.
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
     final bloc = context.read<TasbeehBloc>();
     if (bloc.state.status == TasbeehStatus.initial) bloc.add(TasbeehStarted());
+    _lifecycle = AppLifecycleListener(
+      onResume: () => bloc.add(TasbeehDayChecked()),
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
   }
 
   void _count(TasbeehState state) {

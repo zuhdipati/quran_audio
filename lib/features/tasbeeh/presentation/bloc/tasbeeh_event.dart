@@ -21,3 +21,7 @@ class TasbeehDzikirSelected extends TasbeehEvent {
 class TasbeehIncremented extends TasbeehEvent {}
 
 class TasbeehReset extends TasbeehEvent {}
+
+/// Look at the date again, e.g. when the app returns to the foreground,
+/// in case midnight passed while it was away.
+class TasbeehDayChecked extends TasbeehEvent {}

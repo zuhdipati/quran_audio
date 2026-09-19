@@ -32,4 +32,11 @@ class DateTimeUtils {
 
   static bool isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
+
+  /// "2026-09-20" for storage. Built by hand rather than with DateFormat,
+  /// whose digits follow the locale.
+  static String dayKey(DateTime date) =>
+      '${date.year.toString().padLeft(4, '0')}-'
+      '${date.month.toString().padLeft(2, '0')}-'
+      '${date.day.toString().padLeft(2, '0')}';
 }

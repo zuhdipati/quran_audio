@@ -7,6 +7,10 @@ class TasbeehState extends Equatable {
   final List<DzikirEntity> dzikirList;
   final int selectedIndex;
   final Map<String, int> counts;
+
+  /// The day [counts] belong to; set once loaded.
+  final DateTime? day;
+
   final String? message;
 
   const TasbeehState({
@@ -14,6 +18,7 @@ class TasbeehState extends Equatable {
     this.dzikirList = const [],
     this.selectedIndex = 0,
     this.counts = const {},
+    this.day,
     this.message,
   });
 
@@ -37,6 +42,7 @@ class TasbeehState extends Equatable {
     List<DzikirEntity>? dzikirList,
     int? selectedIndex,
     Map<String, int>? counts,
+    DateTime? day,
     String? message,
   }) {
     return TasbeehState(
@@ -44,6 +50,7 @@ class TasbeehState extends Equatable {
       dzikirList: dzikirList ?? this.dzikirList,
       selectedIndex: selectedIndex ?? this.selectedIndex,
       counts: counts ?? this.counts,
+      day: day ?? this.day,
       message: message ?? this.message,
     );
   }
@@ -54,6 +61,7 @@ class TasbeehState extends Equatable {
     dzikirList,
     selectedIndex,
     counts,
+    day,
     message,
   ];
 }

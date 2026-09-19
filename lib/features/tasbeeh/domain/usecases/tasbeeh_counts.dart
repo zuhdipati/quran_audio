@@ -5,7 +5,7 @@ class GetTasbeehCounts {
 
   GetTasbeehCounts(this.repository);
 
-  Future<Map<String, int>> call() => repository.getCounts();
+  Future<Map<String, int>> call(DateTime day) => repository.getCounts(day);
 }
 
 class SaveTasbeehCount {
@@ -13,6 +13,6 @@ class SaveTasbeehCount {
 
   SaveTasbeehCount(this.repository);
 
-  Future<void> call(String dzikirId, int count) =>
-      repository.saveCount(dzikirId, count);
+  Future<void> call(String dzikirId, int count, DateTime day) =>
+      repository.saveCount(dzikirId, count, day);
 }
